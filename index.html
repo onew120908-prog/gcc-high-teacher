@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>은혜의교회 고등부 교사실</title>
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+  body { margin: 0; }
+  #gy-root, #gy-root * { box-sizing: border-box; }
+  #gy-root {
+    --indigo: #4B3AA4;
+    --indigo-deep: #2E2266;
+    --dawn: #F3B65A;
+    --dawn-soft: #FBE6C2;
+    --rose: #E2637A;
+    --rose-soft: #FBDCE2;
+    --paper: #F8F6FC;
+    --ink: #221C3A;
+    --ink-soft: #6E6690;
+    --card: #FFFFFF;
+    --line: #E7E1F3;
+    --shadow: 0 2px 14px rgba(43,30,90,0.08), 0 1px 2px rgba(43,30,90,0.06);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    min-height: 100vh;
+    position: relative;
+  }
+  #gy-root .serif { font-family: 'Gowun Batang', serif; }
+
+  .glow {
+    position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+    width: 640px; height: 320px; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at center, rgba(243,182,90,0.35), rgba(75,58,164,0.18) 55%, transparent 75%);
+    filter: blur(10px);
+  }
+
+  .shell { position: relative; z-index: 1; min-height: 100vh; padding-bottom: 92px; }
+  .container { max-width: 640px; margin: 0 auto; padding: 20px 18px 40px; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; position: sticky; top: 0; z-index: 20;
+    background: rgba(248,246,252,0.88); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--indigo), var(--indigo-deep));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 14px;
+  }
+  .brand .name { font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 17px; white-space: nowrap; }
+  .who { font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .who button {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+    padding: 6px 11px; border-radius: 999px; font-size: 12px; cursor: pointer; white-space: nowrap;
+  }
+  .who button:hover { background: var(--dawn-soft); color: var(--indigo-deep); }
+  @media (max-width: 400px) {
+    .topbar { padding: 12px 14px; flex-wrap: wrap; row-gap: 8px; }
+    .brand .name { font-size: 15px; }
+    .who { font-size: 11.5px; width: 100%; justify-content: flex-start; }
+    .who button { padding: 5px 9px; font-size: 11px; }
+  }
+
+  .gate { max-width: 380px; margin: 90px auto; background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px; padding: 32px 26px; box-shadow: var(--shadow); position: relative; z-index: 1; }
+  .gate h2 { font-family: 'Gowun Batang', serif; margin: 0 0 6px; font-size: 21px; color: var(--indigo-deep); }
+  .gate p.hint { color: var(--ink-soft); font-size: 13px; margin: 0 0 22px; line-height: 1.55; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; font-weight: 500; }
+  .field input, .field textarea, .field select {
+    width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 10px;
+    padding: 10px 12px; font-size: 14.5px; font-family: 'Noto Sans KR', sans-serif; color: var(--ink);
+  }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--indigo); outline-offset: 1px; border-color: var(--indigo); }
+  .field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  .radio-row { display: flex; gap: 10px; }
+  .radio-opt {
+    flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; text-align: center;
+    font-size: 13px; cursor: pointer; color: var(--ink-soft); user-select: none;
+  }
+  .radio-opt.on { background: var(--indigo); color: #fff; border-color: var(--indigo); font-weight: 700; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: none; border-radius: 10px; padding: 10px 18px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .btn-primary { background: var(--indigo); color: #fff; }
+  .btn-primary:hover { background: var(--indigo-deep); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: var(--dawn-soft); color: var(--indigo-deep); }
+  .btn-block { width: 100%; }
+  .btn-sm { font-size: 12.5px; padding: 6px 12px; }
+
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: flex; justify-content: center; padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(248,246,252,0), var(--paper) 30%);
+  }
+  .tabbar-inner {
+    display: flex; gap: 2px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px; padding: 6px; box-shadow: 0 8px 24px rgba(43,30,90,0.14); max-width: 480px; width: 100%;
+  }
+  .tabbtn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: transparent; border: none; border-radius: 13px; padding: 8px 4px; cursor: pointer;
+    color: var(--ink-soft); font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tabbtn .ic { font-size: 18px; }
+  .tabbtn .lb { font-size: 10.5px; font-weight: 500; }
+  .tabbtn.active { background: var(--indigo); color: #fff; }
+
+  .section-title { font-family: 'Gowun Batang', serif; font-size: 18px; font-weight: 700; margin: 0 0 4px; color: var(--indigo-deep); }
+  .section-desc { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.55; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px; }
+
+  .divider { height: 1px; background: var(--line); margin: 22px 0; }
+
+  .cal-head { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
+  .cal-head .navbtn { background: var(--paper); border: 1px solid var(--line); color: var(--indigo-deep); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; }
+  .cal-title { font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 15px; min-width: 90px; text-align: center; }
+  .sunday-list { display: flex; flex-direction: column; gap: 8px; }
+  .sunday-row {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff;
+  }
+  .sunday-row.got { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .sunday-row.future { opacity: .5; }
+  .sunday-row.clickable { cursor: pointer; }
+  .sunday-date { font-size: 13.5px; font-weight: 500; }
+  .sunday-mark { font-size: 12.5px; font-weight: 700; }
+
+  .feed-card { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--indigo);
+    border-radius: 12px; padding: 15px 17px; margin-bottom: 12px; }
+  .feed-card.qt { border-left-color: var(--dawn); }
+  .feed-card.prayer { border-left-color: var(--rose); }
+  .feed-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .feed-title { font-weight: 700; font-size: 14.5px; }
+  .feed-date { font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+  .feed-meta { font-size: 12px; color: var(--indigo); margin-top: 2px; font-weight: 500; }
+  .feed-body { font-size: 13.5px; line-height: 1.65; margin-top: 8px; white-space: pre-wrap; color: var(--ink); }
+  .feed-author { font-size: 11.5px; color: var(--ink-soft); margin-top: 6px; }
+
+  .badge { display: inline-block; font-size: 10.5px; padding: 2px 9px; border-radius: 999px; font-weight: 700; }
+  .badge-public { background: var(--dawn-soft); color: #8A6417; }
+  .badge-private { background: #EEE9F9; color: var(--indigo-deep); }
+  .badge-answered { background: var(--rose-soft); color: #A13851; }
+
+  .comment { margin-top: 10px; background: var(--paper); border-radius: 8px; padding: 8px 11px; font-size: 12.5px; }
+  .comment b { color: var(--indigo); }
+  .comment-form { margin-top: 10px; display: flex; gap: 8px; }
+  .comment-form input { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--ink-soft); }
+  .empty .big { font-size: 30px; margin-bottom: 10px; }
+
+  .kid-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px;
+    box-shadow: var(--shadow); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .kid-info { cursor: pointer; flex: 1; }
+  .kid-info h4 { font-family: 'Gowun Batang', serif; font-size: 14.5px; margin: 0 0 4px; }
+  .kid-info .stat { font-size: 11px; color: var(--ink-soft); }
+  .kid-actions { display: flex; align-items: center; gap: 6px; }
+  .present-toggle {
+    border: 1px solid var(--indigo); background: #fff; color: var(--indigo); border-radius: 999px;
+    padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  .present-toggle.on { background: var(--indigo); color: #fff; }
+  .kid-del { background: none; border: none; color: var(--ink-soft); cursor: pointer; font-size: 15px; padding: 4px; }
+  .kid-del:hover { color: var(--rose); }
+
+  .backlink { font-size: 12.5px; color: var(--indigo-deep); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 12px; font-weight: 500; }
+  .backlink:hover { text-decoration: underline; }
+
+  .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: var(--indigo-deep); color: #fff; padding: 10px 20px; border-radius: 999px;
+    font-size: 13px; z-index: 50; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+
+  .subtab-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .subtab { flex: 1; padding: 9px; border-radius: 10px; border: 1px solid var(--line); background: var(--card);
+    color: var(--ink-soft); text-align: center; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .subtab.active { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+
+  .del-x { float: right; font-size: 11.5px; color: var(--ink-soft); cursor: pointer; background: none; border: none; }
+  .del-x:hover { color: var(--rose); }
+
+  .attend-summary { display: flex; gap: 10px; margin-bottom: 16px; }
+  .attend-summary .box { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; text-align: center; box-shadow: var(--shadow); }
+  .attend-summary .box b { font-family: 'Gowun Batang', serif; font-size: 22px; color: var(--indigo); display: block; }
+  .attend-summary .box span { font-size: 11px; color: var(--ink-soft); }
+
+  .class-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 15px 17px;
+    box-shadow: var(--shadow); margin-bottom: 12px; cursor: pointer; }
+  .class-card h4 { font-family: 'Gowun Batang', serif; font-size: 16px; margin: 0 0 8px; color: var(--indigo-deep); }
+  .class-card .row { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-soft); }
+  .class-card .row b { color: var(--indigo); font-size: 14px; }
+  .class-card .row .absent b { color: var(--rose); }
+
+  .add-kid-row { display: grid; grid-template-columns: 84px 1fr 1fr auto; gap: 8px; margin-bottom: 16px; }
+  .add-kid-row select { border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px; font-size: 13.5px; background:#fff; }
+  @media (max-width: 480px) { .add-kid-row { grid-template-columns: 1fr 1fr; } .add-kid-row button { grid-column: span 2; } }
+
+  .week-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; font-size: 13px; background: #fff; }
+  .week-row .wk-date { font-weight: 500; }
+  .week-row .wk-counts { display: flex; gap: 10px; }
+  .week-row .present { color: var(--indigo); font-weight: 700; }
+  .week-row .absent { color: var(--rose); font-weight: 700; }
+
+  .stat-box { display:flex; gap:10px; margin-bottom:18px; }
+  .stat-box .sb { flex:1; background: var(--indigo); color:#fff;
+    border-radius: 12px; padding: 13px; text-align:center; box-shadow: var(--shadow); }
+  .stat-box .sb b { font-family:'Gowun Batang', serif; font-size: 22px; display:block; }
+  .stat-box .sb span { font-size: 11px; opacity:.9; }
+
+  .rate-row { margin-bottom: 14px; }
+  .rate-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; font-weight: 500; }
+  .rate-top .pct { color: var(--indigo-deep); font-weight: 700; }
+  .rate-track { height: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .rate-fill { height: 100%; background: var(--indigo); border-radius: 999px; transition: width .4s; }
+
+  .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding: 10px 4px 0; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .bar-pct { font-size: 10px; color: var(--indigo-deep); font-weight: 700; margin-bottom: 4px; }
+  .bar-fill { width: 60%; min-height: 3px; background: var(--indigo); border-radius: 4px 4px 2px 2px; }
+  .bar-label { font-size: 10px; color: var(--ink-soft); margin-top: 6px; text-align:center; }
+
+  .month-picker { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:16px; }
+
+  .badge-absence { background: var(--rose-soft); color: #A13851; }
+  .badge-visit { background: #EEE9F9; color: var(--indigo-deep); }
+  .badge-etc { background: var(--dawn-soft); color: #8A6417; }
+
+  .note-item { border:1px solid var(--line); border-radius:10px; padding:11px 13px; margin-bottom:9px; background:#fff; }
+  .note-item .ni-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; flex-wrap: wrap; }
+  .note-item .ni-body { font-size:13.5px; line-height:1.6; white-space:pre-wrap; }
+  .note-item .ni-meta { font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<div id="gy-root">
+  <div id="gy-shell" class="shell"></div>
+</div>
+
+<!-- Firebase compat SDK (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Firebase 초기화 + window.storage shim -->
+<script>
+(function() {
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcuK64J-yti_nVHy7SVzxF-gg0mMwtRck",
+    authDomain: "gcc-high-b56c5.firebaseapp.com",
+    projectId: "gcc-high-b56c5",
+    storageBucket: "gcc-high-b56c5.firebasestorage.app",
+    messagingSenderId: "154851021992",
+    appId: "1:154851021992:web:b7e5090370ddb2b7ac1e9d"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const _db = firebase.firestore();
+
+  window.storage = {
+    async set(key, value) {
+      await _db.collection('kv').doc(key).set({ v: value, t: Date.now() });
+    },
+    async get(key) {
+      const snap = await _db.collection('kv').doc(key).get();
+      if (snap.exists) return { value: snap.data().v };
+      return null;
+    },
+    async list(prefix) {
+      // 레거시 마이그레이션용 — 새 배포에서는 항상 빈 배열 반환
+      return { keys: [] };
+    }
+  };
+})();
+</script>
+
+<!-- 앱 본체 -->
+<script>
+(function(){
+  const shell = document.getElementById('gy-shell');
+  const TEACHER_PASSCODE = '0000';
+
+  const state = {
+    authed: false,
+    teacherName: null,
+    tab: 'attend',
+    attendClass: null,
+    attendKid: null,
+    prayerView: 'all',
+    _calMonth: null,
+    _statsMonth: null,
+    _noteType: 'absence',
+  };
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todayStr(){
+    const d = new Date();
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+  function fmtDate(s){
+    if(!s) return '';
+    const d = new Date(s + (s.length===10?'T00:00:00':''));
+    return `${d.getMonth()+1}월 ${d.getDate()}일`;
+  }
+  function fmtShort(s){
+    if(!s) return '';
+    const d = new Date(s + (s.length===10?'T00:00:00':''));
+    return `${d.getMonth()+1}/${d.getDate()}`;
+  }
+  function esc(str){
+    return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function monthKey(dateStr){ const d = new Date(dateStr+'T00:00:00'); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`; }
+  function monthLabel(ym){ const [y,m]=ym.split('-').map(Number); return `${y}년 ${m}월`; }
+  function shiftMonth(ym, delta){
+    let [y,m]=ym.split('-').map(Number); m+=delta;
+    if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+    return `${y}-${pad2(m)}`;
+  }
+  function toast(msg){
+    const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+    document.body.appendChild(t); setTimeout(()=>t.remove(),2200);
+  }
+  function showConfirm(message){
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed; inset:0; background:rgba(34,28,58,0.45); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;';
+      const box = document.createElement('div');
+      box.style.cssText = 'background:#ffffff; border-radius:16px; padding:22px 20px; max-width:340px; width:100%; box-shadow:0 12px 30px rgba(0,0,0,0.25); font-family:"Noto Sans KR", sans-serif;';
+      const msgEl = document.createElement('div');
+      msgEl.style.cssText = 'font-size:14px; line-height:1.6; color:#221C3A; margin-bottom:18px; white-space:pre-wrap;';
+      msgEl.textContent = message;
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex; gap:8px;';
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = '취소';
+      cancelBtn.style.cssText = 'flex:1; border:1px solid #E7E1F3; background:#ffffff; color:#6E6690; border-radius:10px; padding:10px 12px; font-size:14px; font-weight:500; cursor:pointer; font-family:"Noto Sans KR", sans-serif;';
+      const okBtn = document.createElement('button');
+      okBtn.textContent = '확인';
+      okBtn.style.cssText = 'flex:1; border:none; background:#4B3AA4; color:#ffffff; border-radius:10px; padding:10px 12px; font-size:14px; font-weight:500; cursor:pointer; font-family:"Noto Sans KR", sans-serif;';
+      btnRow.appendChild(cancelBtn); btnRow.appendChild(okBtn);
+      box.appendChild(msgEl); box.appendChild(btnRow);
+      overlay.appendChild(box);
+      const mountPoint = document.getElementById('gy-root') || document.body;
+      mountPoint.appendChild(overlay);
+      const cleanup = (result) => { mountPoint.removeChild(overlay); resolve(result); };
+      cancelBtn.onclick = () => cleanup(false);
+      okBtn.onclick = () => cleanup(true);
+      overlay.onclick = (e) => { if(e.target === overlay) cleanup(false); };
+    });
+  }
+  async function withLoading(btn, fn){
+    if(btn.disabled) return;
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = '저장 중...';
+    try { await fn(); }
+    finally { if(document.body.contains(btn)){ btn.disabled=false; btn.textContent=original; } }
+  }
+  function downloadFile(filename, content, mime){
+    const blob = new Blob([content], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function readFileAsText(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsText(file);
+    });
+  }
+
+  const GRADES = ['고1','고2','고3'];
+  function classLabel(grade, cls){ return `${grade} ${cls}`; }
+  function withTimeout(promise, ms){
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('요청 시간이 너무 오래 걸려요.')), ms))
+    ]);
+  }
+  function delay(ms){ return new Promise(res => setTimeout(res, ms)); }
+  async function storageSetWithRetry(key, value, maxRetries){
+    if(maxRetries === undefined) maxRetries = 5;
+    let attempt = 0;
+    while(true){
+      try {
+        await window.storage.set(key, value, true);
+        return true;
+      } catch(e){
+        const msg = (e && e.message) ? e.message : String(e);
+        const isRateLimit = /rate limit/i.test(msg);
+        attempt++;
+        if(!isRateLimit || attempt > maxRetries) throw e;
+        await delay(700 * attempt);
+      }
+    }
+  }
+  async function storageGetWithRetry(key, maxRetries){
+    if(maxRetries === undefined) maxRetries = 5;
+    let attempt = 0;
+    while(true){
+      try {
+        return await withTimeout(window.storage.get(key, true), 10000);
+      } catch(e){
+        const msg = (e && e.message) ? e.message : String(e);
+        const isRateLimit = /rate limit/i.test(msg);
+        attempt++;
+        if(!isRateLimit || attempt > maxRetries) throw e;
+        await delay(700 * attempt);
+      }
+    }
+  }
+
+  let _rosterMigrationDone = false;
+  async function migrateLegacyKids(){
+    try {
+      const listRes = await withTimeout(window.storage.list('kid:', true), 10000).catch(()=>null);
+      if(!listRes || !listRes.keys || !listRes.keys.length) return [];
+      const arr = [];
+      for(let i=0; i<listRes.keys.length; i+=3){
+        const batch = listRes.keys.slice(i, i+3);
+        const results = await Promise.all(batch.map(async k=>{
+          const rest = k.slice('kid:'.length);
+          const parts = rest.split('::');
+          if(parts.length < 3) return null;
+          const [grade, cls, name] = parts;
+          try {
+            const g = await withTimeout(window.storage.get(k, true), 10000);
+            const rec = JSON.parse(g.value);
+            return { grade, cls, name, checkins: rec.checkins || [], notes: rec.notes || [] };
+          } catch(e){ return null; }
+        }));
+        results.forEach(r=>{ if(r) arr.push(r); });
+        if(i+3 < listRes.keys.length) await delay(300);
+      }
+      if(arr.length) await saveRoster(arr);
+      return arr;
+    } catch(e){ console.error(e); return []; }
+  }
+  async function loadRoster(){
+    try {
+      const r = await storageGetWithRetry('roster').catch(()=>null);
+      if(r){
+        const arr = JSON.parse(r.value);
+        return Array.isArray(arr) ? arr.map(k=>({ grade:k.grade, cls:k.cls, name:k.name, checkins:k.checkins||[], notes:k.notes||[] })) : [];
+      }
+      if(!_rosterMigrationDone){
+        _rosterMigrationDone = true;
+        const migrated = await migrateLegacyKids();
+        if(migrated.length) toast(`예전 방식으로 저장된 학생 ${migrated.length}명을 새 방식으로 옮겼어요.`);
+        return migrated;
+      }
+      return [];
+    } catch(e){
+      console.error(e);
+      toast('저장소 응답이 없어요. 잠시 후 다시 시도해 주세요.');
+      throw e;
+    }
+  }
+  async function saveRoster(arr){
+    try { await storageSetWithRetry('roster', JSON.stringify(arr)); return true; }
+    catch(e){ console.error(e); toast('저장에 실패했어요. 다시 시도해 주세요.'); return false; }
+  }
+  async function loadAllKids(){
+    const arr = await loadRoster();
+    return arr.slice().sort((a,b)=> (a.grade+a.cls+a.name).localeCompare(b.grade+b.cls+b.name,'ko'));
+  }
+  function findKidIndex(arr, grade, cls, name){
+    return arr.findIndex(k=>k.grade===grade && k.cls===cls && k.name===name);
+  }
+  async function kidExists(grade, cls, name){
+    const arr = await loadRoster();
+    return findKidIndex(arr, grade, cls, name) >= 0;
+  }
+  async function addKid(grade, cls, name){
+    const arr = await loadRoster();
+    if(findKidIndex(arr, grade, cls, name) >= 0) return { ok:false, reason:'dup' };
+    arr.push({ grade, cls, name, checkins: [], notes: [] });
+    const ok = await saveRoster(arr);
+    return { ok };
+  }
+  async function updateKid(grade, cls, name, patch){
+    const arr = await loadRoster();
+    const idx = findKidIndex(arr, grade, cls, name);
+    if(idx < 0) return false;
+    arr[idx] = Object.assign({}, arr[idx], patch);
+    return await saveRoster(arr);
+  }
+  async function deleteKid(grade, cls, name){
+    const arr = await loadRoster();
+    const idx = findKidIndex(arr, grade, cls, name);
+    if(idx < 0) return true;
+    arr.splice(idx, 1);
+    return await saveRoster(arr);
+  }
+  function groupByClass(kids){
+    const map = new Map();
+    kids.forEach(k=>{
+      const ck = classLabel(k.grade, k.cls);
+      if(!map.has(ck)) map.set(ck, { grade:k.grade, cls:k.cls, kids:[] });
+      map.get(ck).kids.push(k);
+    });
+    return [...map.values()].sort((a,b)=> (a.grade+a.cls).localeCompare(b.grade+b.cls,'ko'));
+  }
+
+  const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers' };
+  const COLLECTION_LEGACY_PREFIX = { notice: 'notice:', qt: 'qt:', prayer: 'prayer:' };
+  const _collectionMigrationDone = { notice:false, qt:false, prayer:false };
+  async function migrateLegacyCollection(type){
+    try {
+      const prefix = COLLECTION_LEGACY_PREFIX[type];
+      const listRes = await withTimeout(window.storage.list(prefix, true), 10000).catch(()=>null);
+      if(!listRes || !listRes.keys || !listRes.keys.length) return [];
+      const arr = [];
+      for(let i=0; i<listRes.keys.length; i+=3){
+        const batch = listRes.keys.slice(i, i+3);
+        const results = await Promise.all(batch.map(async k=>{
+          try { const g = await withTimeout(window.storage.get(k, true), 10000); return JSON.parse(g.value); }
+          catch(e){ return null; }
+        }));
+        results.forEach(r=>{ if(r) arr.push(r); });
+        if(i+3 < listRes.keys.length) await delay(300);
+      }
+      if(arr.length) await saveCollectionArr(type, arr);
+      return arr;
+    } catch(e){ console.error(e); return []; }
+  }
+  async function loadCollection(type){
+    try {
+      const storeKey = COLLECTION_KEYS[type];
+      const r = await storageGetWithRetry(storeKey).catch(()=>null);
+      if(r){
+        const arr = JSON.parse(r.value);
+        return Array.isArray(arr) ? arr.slice().sort((a,b)=>b.createdAt-a.createdAt) : [];
+      }
+      if(!_collectionMigrationDone[type]){
+        _collectionMigrationDone[type] = true;
+        const migrated = await migrateLegacyCollection(type);
+        return migrated.slice().sort((a,b)=>b.createdAt-a.createdAt);
+      }
+      return [];
+    } catch(e){
+      console.error(e);
+      toast('저장소 응답이 없어요. 화면을 완전히 새로고침해 주세요.');
+      return null;
+    }
+  }
+  async function saveCollectionArr(type, arr){
+    try { await storageSetWithRetry(COLLECTION_KEYS[type], JSON.stringify(arr)); return true; }
+    catch(e){ console.error(e); toast('저장에 실패했어요. 다시 시도해 주세요.'); return false; }
+  }
+  async function saveItem(type, item){
+    let arr = await loadCollection(type);
+    if(!Array.isArray(arr)) arr = [];
+    const idx = arr.findIndex(x=>x.id===item.id);
+    if(idx >= 0) arr[idx] = item; else arr.push(item);
+    return await saveCollectionArr(type, arr);
+  }
+  async function deleteItem(type, id){
+    const storeKey = COLLECTION_KEYS[type];
+    try {
+      const r = await storageGetWithRetry(storeKey).catch(()=>null);
+      if(!r) return true;
+      let arr = JSON.parse(r.value);
+      if(!Array.isArray(arr)) arr = [];
+      arr = arr.filter(x=>x.id!==id);
+      return await saveCollectionArr(type, arr);
+    } catch(e){ console.error(e); return false; }
+  }
+
+  function getSundaysInMonth(ym){
+    const [y,m] = ym.split('-').map(Number);
+    const dim = new Date(y,m,0).getDate();
+    const arr = [];
+    for(let d=1; d<=dim; d++){
+      if(new Date(y,m-1,d).getDay() === 0) arr.push(`${y}-${pad2(m)}-${pad2(d)}`);
+    }
+    return arr;
+  }
+  function getThisSunday(){
+    const t = new Date(todayStr()+'T00:00:00');
+    t.setDate(t.getDate() - t.getDay());
+    return `${t.getFullYear()}-${pad2(t.getMonth()+1)}-${pad2(t.getDate())}`;
+  }
+  function getLastNSundays(n){
+    const this_ = getThisSunday();
+    const arr = [];
+    let d = new Date(this_+'T00:00:00');
+    for(let i=0;i<n;i++){
+      arr.unshift(`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`);
+      d.setDate(d.getDate()-7);
+    }
+    return arr;
+  }
+  function sundayStats(dateSet, ym){
+    const sundays = getSundaysInMonth(ym);
+    const todayS = todayStr();
+    let got=0, elapsed=0;
+    sundays.forEach(ds=>{
+      if(ds <= todayS){ elapsed++; if(dateSet.has(ds)) got++; }
+    });
+    return { sundays, got, elapsed, dim: sundays.length };
+  }
+  function sundayListHtml(stats, dateSet, idPrefix, clickable){
+    const todayS = todayStr();
+    return `
+      <div class="cal-head">
+        <button class="navbtn" id="${idPrefix}-prev">‹</button>
+        <div class="cal-title">${monthLabel(state._calMonth)}</div>
+        <button class="navbtn" id="${idPrefix}-next">›</button>
+      </div>
+      <div class="sunday-list">
+        ${stats.sundays.length ? stats.sundays.map(ds=>{
+          const isFuture = ds > todayS;
+          const has = dateSet.has(ds);
+          const clk = clickable && !isFuture ? 'clickable' : '';
+          return `<div class="sunday-row ${has?'got':''} ${isFuture?'future':''} ${clk}" ${clickable && !isFuture ? `data-date="${ds}"`:''}>
+            <span class="sunday-date">${fmtDate(ds)} (주일)</span>
+            <span class="sunday-mark">${has?'✅ 출석':(isFuture?'예정':'—')}</span>
+          </div>`;
+        }).join('') : `<div class="empty" style="padding:20px;">이 달에는 주일이 없어요.</div>`}
+      </div>
+      <div id="cal-summary" style="text-align:center; font-size:12.5px; color:var(--ink-soft); margin-top:12px;">이번 달 출석 <b style="color:var(--indigo); font-size:15px;">${stats.got}</b> / ${stats.elapsed}주</div>
+    `;
+  }
+
+  function weeklyClassStats(classKids, ym){
+    const sundays = getSundaysInMonth(ym);
+    const todayS = todayStr();
+    return sundays.filter(ds=>ds<=todayS).map(ds=>{
+      const present = classKids.filter(k=>k.checkins.includes(ds));
+      return { date: ds, presentCount: present.length, absentCount: classKids.length - present.length, presentNames: present.map(k=>k.name) };
+    });
+  }
+
+  function render(){
+    if(!state.authed) return renderGate();
+    return renderApp();
+  }
+
+  function topbar(rightHtml){
+    return `<div class="topbar">
+      <div class="brand"><div class="mark">은</div><div class="name">은혜의교회 고등부 교사실</div></div>
+      <div class="who">${rightHtml}</div>
+    </div>`;
+  }
+
+  function renderGate(){
+    shell.innerHTML = `
+      <div class="glow"></div>
+      <div class="container" style="position:relative; z-index:1;">
+        <div class="gate">
+          <h2 class="serif">교사실 입장</h2>
+          <p class="hint">고등부 선생님들만 사용하는 공간이에요. 접속 코드와 이름을 입력해 주세요.</p>
+          <div class="field"><label>접속 코드</label><input id="pw" type="password" placeholder="접속 코드"/></div>
+          <div class="field"><label>선생님 이름</label><input id="nm" type="text" placeholder="예: 김은혜 선생님" maxlength="20"/></div>
+          <button class="btn btn-primary btn-block" id="go">입장하기</button>
+        </div>
+      </div>`;
+    const pw = document.getElementById('pw');
+    const nm = document.getElementById('nm');
+    pw.focus();
+    const submit = () => {
+      if(pw.value !== TEACHER_PASSCODE){ toast('접속 코드가 올바르지 않아요.'); pw.value=''; pw.focus(); return; }
+      const name = nm.value.trim();
+      if(!name){ toast('이름을 입력해 주세요.'); nm.focus(); return; }
+      state.authed = true;
+      state.teacherName = name;
+      state.tab = 'attend';
+      state._calMonth = monthKey(todayStr());
+      render();
+    };
+    document.getElementById('go').onclick = submit;
+    nm.addEventListener('keydown', e => { if(e.key==='Enter') submit(); });
+    pw.addEventListener('keydown', e => { if(e.key==='Enter') nm.focus(); });
+  }
+
+  function tabbarHtml(){
+    const tabs = [
+      ['attend','📋','출결관리'],
+      ['stats','📊','통계'],
+      ['notice','📢','공지사항'],
+      ['qt','📖','QT나눔'],
+      ['prayer','🙏','기도제목'],
+    ];
+    return `<div class="tabbar"><div class="tabbar-inner">
+      ${tabs.map(([k,ic,lb])=>`<button class="tabbtn ${state.tab===k?'active':''}" data-tab="${k}"><span class="ic">${ic}</span><span class="lb">${lb}</span></button>`).join('')}
+    </div></div>`;
+  }
+
+  function renderApp(){
+    shell.innerHTML = `
+      ${topbar(`<span>${esc(state.teacherName)}</span><button id="import-json">⬆ 복원</button><input type="file" id="import-file" accept="application/json,.json,.txt" style="display:none;"/><button id="export-json">⬇ 백업</button><button id="logout">나가기</button>`)}
+      <div class="container" id="panel"></div>
+      ${tabbarHtml()}`;
+    document.getElementById('logout').onclick = () => { state.authed=false; state.teacherName=null; render(); };
+    document.getElementById('export-json').onclick = exportAllJSON;
+    document.getElementById('import-json').onclick = () => { document.getElementById('import-file').click(); };
+    document.getElementById('import-file').onchange = async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      if(!(await showConfirm('백업 파일의 내용을 지금 화면에 불러와 저장할까요? 같은 학생·글은 최신 내용으로 덮어써져요.'))) { e.target.value=''; return; }
+      await importAllJSON(file);
+      e.target.value = '';
+    };
+    shell.querySelectorAll('.tabbtn').forEach(b=>{
+      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; render(); };
+    });
+    const panel = document.getElementById('panel');
+    if(state.tab==='attend') renderAttend(panel);
+    else if(state.tab==='stats') renderStats(panel);
+    else if(state.tab==='notice') renderNotice(panel);
+    else if(state.tab==='qt') renderQt(panel);
+    else renderPrayer(panel);
+  }
+
+  async function exportAllJSON(){
+    let kids;
+    try { kids = await loadAllKids(); }
+    catch(e){ toast('저장소 응답이 없어서 백업할 수 없어요. 잠시 후 다시 시도해 주세요.'); return; }
+    const notices = await loadCollection('notice');
+    const qts = await loadCollection('qt');
+    const prayers = await loadCollection('prayer');
+    if(notices === null || qts === null || prayers === null){
+      toast('저장소 응답이 없어서 백업할 수 없어요. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    if(!kids.length && !notices.length && !qts.length && !prayers.length){ toast('내려받을 데이터가 없어요.'); return; }
+    const payload = { exportedAt: todayStr(), kids, notices, qts, prayers };
+    downloadFile(`은혜의교회_고등부_교사용_백업_${todayStr()}.json`, JSON.stringify(payload,null,2), 'application/json');
+    toast('백업 파일을 내려받았어요.');
+  }
+
+  async function importAllJSON(file){
+    let data;
+    try {
+      const text = await readFileAsText(file);
+      data = JSON.parse(text);
+    } catch(e){ toast('백업 파일을 읽을 수 없어요. 파일을 확인해 주세요.'); return; }
+
+    const kidsIn = Array.isArray(data.kids) ? data.kids.filter(k=>k && k.grade && k.cls && k.name) : [];
+    const noticesIn = Array.isArray(data.notices) ? data.notices.filter(n=>n && n.id) : [];
+    const qtsIn = Array.isArray(data.qts) ? data.qts.filter(q=>q && q.id) : [];
+    const prayersIn = Array.isArray(data.prayers) ? data.prayers.filter(p=>p && p.id) : [];
+
+    toast('복원 중... 학생 명단 불러오는 중');
+    const roster = await loadRoster();
+    kidsIn.forEach(k=>{
+      const idx = findKidIndex(roster, k.grade, k.cls, k.name);
+      const merged = { grade:k.grade, cls:k.cls, name:k.name, checkins:k.checkins||[], notes:k.notes||[] };
+      if(idx >= 0) roster[idx] = merged; else roster.push(merged);
+    });
+    const rosterOk = await saveRoster(roster);
+    await delay(300);
+
+    async function mergeAndSaveCollection(type, incoming){
+      if(!incoming.length) return 0;
+      let arr = await loadCollection(type);
+      if(arr === null) arr = [];
+      incoming.forEach(item=>{
+        const idx = arr.findIndex(x=>x.id===item.id);
+        if(idx >= 0) arr[idx] = item; else arr.push(item);
+      });
+      await saveCollectionArr(type, arr);
+      return incoming.length;
+    }
+    toast('복원 중... 공지사항 불러오는 중');
+    const noticeCount = await mergeAndSaveCollection('notice', noticesIn);
+    await delay(300);
+    toast('복원 중... QT나눔 불러오는 중');
+    const qtCount = await mergeAndSaveCollection('qt', qtsIn);
+    await delay(300);
+    toast('복원 중... 기도제목 불러오는 중');
+    const prayerCount = await mergeAndSaveCollection('prayer', prayersIn);
+
+    toast(`복원 완료! 학생 ${rosterOk ? kidsIn.length : 0}명, 공지 ${noticeCount}건, QT ${qtCount}건, 기도제목 ${prayerCount}건`);
+    renderApp();
+  }
+
+  async function renderAttend(panel){
+    if(state.attendClass && state.attendKid){
+      return renderKidDetail(panel);
+    }
+    if(state.attendClass){
+      return renderClassDetail(panel);
+    }
+    return renderAttendDashboard(panel);
+  }
+
+  async function renderAttendDashboard(panel){
+    panel.innerHTML = `
+      <div class="section-title serif">출결관리</div>
+      <div class="section-desc">반을 눌러 해당 반의 출석을 등록·확인하세요. 담임 선생님은 담당 반을, 전체를 보시려면 아래에서 모든 반을 확인할 수 있어요.</div>
+      <div class="add-kid-row">
+        <select id="new-grade">${GRADES.map(g=>`<option value="${g}">${g}</option>`).join('')}</select>
+        <input type="text" id="new-cls" placeholder="반 이름 (예: 1반)"/>
+        <input type="text" id="new-kid" placeholder="학생 이름"/>
+        <button class="btn btn-primary" id="add-kid">추가</button>
+      </div>
+      <div id="attend-summary"></div>
+      <div id="class-list"><div class="empty">불러오는 중...</div></div>
+    `;
+    document.getElementById('add-kid').onclick = async function(){
+      const btn = this;
+      const grade = document.getElementById('new-grade').value;
+      const cls = document.getElementById('new-cls').value.trim();
+      const name = document.getElementById('new-kid').value.trim();
+      if(!cls || !name){ toast('반 이름과 학생 이름을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        const result = await addKid(grade, cls, name);
+        if(result.reason === 'dup'){ toast('이미 등록된 학생이에요.'); return; }
+        if(result.ok){ toast(`${classLabel(grade,cls)} ${name} 학생을 추가했어요.`); renderAttendDashboard(panel); }
+      });
+    };
+    document.getElementById('new-kid').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('add-kid').click(); });
+
+    let all;
+    try {
+      all = await loadAllKids();
+    } catch(e){
+      const listEl0 = document.getElementById('class-list');
+      if(listEl0) listEl0.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요. 화면을 새로고침하거나<br/><button class="btn btn-primary btn-sm" id="retry-attend" style="margin-top:10px;">다시 시도</button></div>`;
+      const retryBtn = document.getElementById('retry-attend');
+      if(retryBtn) retryBtn.onclick = () => renderAttendDashboard(panel);
+      return;
+    }
+    const thisSunday = getThisSunday();
+    const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
+    const summaryEl = document.getElementById('attend-summary');
+    if(summaryEl) summaryEl.innerHTML = `
+      <div class="attend-summary">
+        <div class="box"><b>${presentTotal} / ${all.length}</b><span>이번 주일 전체 출석</span></div>
+        <div class="box"><b>${all.length - presentTotal}명</b><span>이번 주일 전체 결석</span></div>
+      </div>`;
+
+    const groups = groupByClass(all);
+    const listEl = document.getElementById('class-list');
+    if(!listEl) return;
+    listEl.innerHTML = groups.length ? groups.map(g=>{
+      const present = g.kids.filter(k=>k.checkins.includes(thisSunday)).length;
+      const absent = g.kids.length - present;
+      return `<div class="class-card" data-grade="${esc(g.grade)}" data-cls="${esc(g.cls)}">
+        <h4>${esc(classLabel(g.grade,g.cls))}</h4>
+        <div class="row">
+          <span>전체 인원 <b>${g.kids.length}명</b></span>
+          <span>이번 주일 출석 <b>${present}명</b></span>
+          <span class="absent">결석 <b>${absent}명</b></span>
+        </div>
+      </div>`;
+    }).join('') : `<div class="empty"><div class="big">🧑‍🎓</div>아직 등록된 반이 없어요.<br/>위에서 학년·반·학생 이름을 입력해 추가해 보세요.</div>`;
+    listEl.querySelectorAll('.class-card').forEach(c=>{
+      c.onclick = () => { state.attendClass = { grade:c.dataset.grade, cls:c.dataset.cls }; state._calMonth = monthKey(todayStr()); renderAttend(panel); };
+    });
+  }
+
+  async function renderClassDetail(panel){
+    const { grade, cls } = state.attendClass;
+    let all;
+    try {
+      all = await loadAllKids();
+    } catch(e){
+      panel.innerHTML = `<div class="backlink" id="back-dash">← 전체 반으로</div><div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-class" style="margin-top:10px;">다시 시도</button></div>`;
+      document.getElementById('back-dash').onclick = () => { state.attendClass=null; renderAttend(panel); };
+      document.getElementById('retry-class').onclick = () => renderClassDetail(panel);
+      return;
+    }
+    const classKids = all.filter(k=>k.grade===grade && k.cls===cls);
+    const thisSunday = getThisSunday();
+    if(!state._calMonth) state._calMonth = monthKey(todayStr());
+    const weekly = weeklyClassStats(classKids, state._calMonth);
+
+    panel.innerHTML = `
+      <div class="backlink" id="back-dash">← 전체 반으로</div>
+      <div class="section-title serif">${esc(classLabel(grade,cls))}</div>
+      <div class="section-desc">이번 주일 출석을 표시하고, 학생 이름을 누르면 개인별 출석 기록을 볼 수 있어요.</div>
+      <div class="add-kid-row" style="grid-template-columns: 1fr auto;">
+        <input type="text" id="new-kid" placeholder="이 반에 학생 추가"/>
+        <button class="btn btn-primary" id="add-kid">추가</button>
+      </div>
+      <div id="kid-list"></div>
+      <div class="divider"></div>
+      <div class="section-title serif" style="font-size:15px;">주별 출석 현황 — ${monthLabel(state._calMonth)}</div>
+      <div class="cal-head" style="margin-bottom:10px;">
+        <button class="navbtn" id="wk-prev">‹</button>
+        <span style="font-size:12.5px; color:var(--ink-soft);">이전/다음 달</span>
+        <button class="navbtn" id="wk-next">›</button>
+      </div>
+      <div id="weekly-list">
+        ${weekly.length ? weekly.map(w=>`
+          <div class="week-row">
+            <span class="wk-date">${fmtDate(w.date)} (주일)</span>
+            <span class="wk-counts"><span class="present">출석 ${w.presentCount}</span><span class="absent">결석 ${w.absentCount}</span></span>
+          </div>`).join('') : `<div class="empty" style="padding:20px;">이 달에는 지난 주일이 없어요.</div>`}
+      </div>
+    `;
+    document.getElementById('back-dash').onclick = () => { state.attendClass=null; renderAttend(panel); };
+    document.getElementById('wk-prev').onclick = () => { state._calMonth = shiftMonth(state._calMonth,-1); renderClassDetail(panel); };
+    document.getElementById('wk-next').onclick = () => { state._calMonth = shiftMonth(state._calMonth,1); renderClassDetail(panel); };
+
+    document.getElementById('add-kid').onclick = async function(){
+      const btn = this;
+      const name = document.getElementById('new-kid').value.trim();
+      if(!name){ toast('학생 이름을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        const result = await addKid(grade, cls, name);
+        if(result.reason === 'dup'){ toast('이미 등록된 학생이에요.'); return; }
+        if(result.ok){ toast(`${name} 학생을 추가했어요.`); renderClassDetail(panel); }
+      });
+    };
+    document.getElementById('new-kid').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('add-kid').click(); });
+
+    const listEl = document.getElementById('kid-list');
+    const ym = monthKey(todayStr());
+    listEl.innerHTML = classKids.length ? classKids.map(k=>{
+      const stats = sundayStats(new Set(k.checkins), ym);
+      const isThisSunday = k.checkins.includes(thisSunday);
+      return `<div class="kid-card">
+        <div class="kid-info" data-name="${esc(k.name)}">
+          <h4>${esc(k.name)}${(k.notes&&k.notes.length) ? ` <span style="font-size:10.5px; color:var(--indigo); font-weight:400;">📝${k.notes.length}</span>` : ''}</h4>
+          <div class="stat">이번 달 ${stats.got} / ${stats.elapsed}주 · 총 누적 ${k.checkins.length}회</div>
+        </div>
+        <div class="kid-actions">
+          <button class="present-toggle ${isThisSunday?'on':''}" data-name="${esc(k.name)}">${isThisSunday?'이번 주일 출석':'출석 표시'}</button>
+          <button class="kid-del" data-name="${esc(k.name)}" title="학생 삭제">✕</button>
+        </div>
+      </div>`;
+    }).join('') : `<div class="empty"><div class="big">🧑‍🎓</div>아직 이 반에 등록된 학생이 없어요.</div>`;
+
+    listEl.querySelectorAll('.kid-info').forEach(el=>{
+      el.onclick = () => { state.attendKid = el.dataset.name; state._calMonth = monthKey(todayStr()); renderAttend(panel); };
+    });
+    listEl.querySelectorAll('.present-toggle').forEach(btn=>{
+      const name = btn.dataset.name;
+      const kidObj = classKids.find(k=>k.name===name);
+      btn.onclick = async function(e){
+        e.stopPropagation();
+        if(!kidObj) return;
+        const idx = kidObj.checkins.indexOf(thisSunday);
+        const willBeOn = idx < 0;
+        if(willBeOn) kidObj.checkins.push(thisSunday); else kidObj.checkins.splice(idx,1);
+        this.classList.toggle('on', willBeOn);
+        this.textContent = willBeOn ? '이번 주일 출석' : '출석 표시';
+        const statEl = this.closest('.kid-card').querySelector('.stat');
+        const newStats = sundayStats(new Set(kidObj.checkins), ym);
+        if(statEl) statEl.textContent = `이번 달 ${newStats.got} / ${newStats.elapsed}주 · 총 누적 ${kidObj.checkins.length}회`;
+        const ok = await updateKid(grade, cls, name, { checkins: kidObj.checkins, notes: kidObj.notes || [] });
+        if(!ok){
+          if(willBeOn) kidObj.checkins.splice(kidObj.checkins.indexOf(thisSunday),1); else kidObj.checkins.push(thisSunday);
+          this.classList.toggle('on', !willBeOn);
+          this.textContent = !willBeOn ? '이번 주일 출석' : '출석 표시';
+          const revertStats = sundayStats(new Set(kidObj.checkins), ym);
+          if(statEl) statEl.textContent = `이번 달 ${revertStats.got} / ${revertStats.elapsed}주 · 총 누적 ${kidObj.checkins.length}회`;
+        }
+      };
+    });
+    listEl.querySelectorAll('.kid-del').forEach(btn=>{
+      btn.onclick = async (e) => {
+        e.stopPropagation();
+        const name = btn.dataset.name;
+        if(!(await showConfirm(`${name} 학생을 명단에서 삭제할까요? 출석 기록도 함께 사라져요.`))) return;
+        await deleteKid(grade, cls, name);
+        toast('삭제했어요.');
+        renderClassDetail(panel);
+      };
+    });
+  }
+
+  async function renderKidDetail(panel){
+    const { grade, cls } = state.attendClass;
+    const name = state.attendKid;
+    const roster = await loadRoster();
+    const idx0 = findKidIndex(roster, grade, cls, name);
+    const rec = idx0 >= 0 ? roster[idx0] : { grade, cls, name, checkins: [], notes: [] };
+    if(!rec.checkins) rec.checkins = [];
+    if(!rec.notes) rec.notes = [];
+    const checked = new Set(rec.checkins);
+    if(!state._calMonth) state._calMonth = monthKey(todayStr());
+    const stats = sundayStats(checked, state._calMonth);
+    const notes = (rec.notes||[]).slice().sort((a,b)=> (b.date||'').localeCompare(a.date||'') || b.createdAt-a.createdAt);
+    const typeLabel = { absence:'결석사유', visit:'심방기록', etc:'기타' };
+    const typeBadge = { absence:'badge-absence', visit:'badge-visit', etc:'badge-etc' };
+    panel.innerHTML = `
+      <div class="backlink" id="back-class">← ${esc(classLabel(grade,cls))}로</div>
+      <div class="section-title serif">${esc(name)} 학생 출석</div>
+      <div class="section-desc">주일 날짜를 눌러 출석 여부를 바꿀 수 있어요.</div>
+      <div class="card">${sundayListHtml(stats, checked, 'cal', true)}</div>
+
+      <div class="divider"></div>
+      <div class="section-title serif" style="font-size:16px;">심방 및 상담 기록</div>
+      <div class="section-desc">결석사유, 심방 내용, 기타 특이사항을 자유롭게 기록해 두세요.</div>
+      <div class="card">
+        <div class="field"><label>분류</label>
+          <div class="radio-row">
+            <div class="radio-opt ${state._noteType==='absence'?'on':''}" id="type-absence" data-type="absence">결석사유</div>
+            <div class="radio-opt ${state._noteType==='visit'?'on':''}" id="type-visit" data-type="visit">심방기록</div>
+            <div class="radio-opt ${state._noteType==='etc'?'on':''}" id="type-etc" data-type="etc">기타</div>
+          </div>
+        </div>
+        <div class="field"><label>날짜</label><input type="date" id="note-date" value="${todayStr()}"/></div>
+        <div class="field"><label>내용</label><textarea id="note-content" placeholder="예: 몸살로 결석, 가정 심방 후 기도 나눔 등"></textarea></div>
+        <button class="btn btn-primary btn-block" id="note-save">기록 저장</button>
+      </div>
+      <div id="note-list">
+        ${notes.length ? notes.map(n=>`
+          <div class="note-item" data-id="${n.id}">
+            <div class="ni-top">
+              <span><span class="badge ${typeBadge[n.type]||'badge-etc'}">${typeLabel[n.type]||'기타'}</span> <span style="font-size:12.5px; font-weight:700; margin-left:4px;">${fmtDate(n.date)}</span></span>
+              <button class="del-x" data-id="${n.id}">삭제</button>
+            </div>
+            <div class="ni-body">${esc(n.content)}</div>
+            <div class="ni-meta">— ${esc(n.author||'')}</div>
+          </div>`).join('') : `<div class="empty" style="padding:24px;"><div class="big">📝</div>아직 기록이 없어요.</div>`}
+      </div>
+    `;
+    document.getElementById('back-class').onclick = () => { state.attendKid=null; renderAttend(panel); };
+    document.getElementById('cal-prev').onclick = () => { state._calMonth = shiftMonth(state._calMonth,-1); renderKidDetail(panel); };
+    document.getElementById('cal-next').onclick = () => { state._calMonth = shiftMonth(state._calMonth,1); renderKidDetail(panel); };
+    panel.querySelectorAll('.sunday-row.clickable').forEach(row=>{
+      row.onclick = async () => {
+        const d = row.dataset.date;
+        const idx = rec.checkins.indexOf(d);
+        const willBeOn = idx < 0;
+        if(willBeOn) rec.checkins.push(d); else rec.checkins.splice(idx,1);
+        row.classList.toggle('got', willBeOn);
+        const markEl = row.querySelector('.sunday-mark');
+        if(markEl) markEl.textContent = willBeOn ? '✅ 출석' : '—';
+        const summaryEl = document.getElementById('cal-summary');
+        const newStats = sundayStats(new Set(rec.checkins), state._calMonth);
+        if(summaryEl) summaryEl.innerHTML = `이번 달 출석 <b style="color:var(--indigo); font-size:15px;">${newStats.got}</b> / ${newStats.elapsed}주`;
+        const ok = await updateKid(grade, cls, name, { checkins: rec.checkins, notes: rec.notes });
+        if(!ok){
+          if(willBeOn) rec.checkins.splice(rec.checkins.indexOf(d),1); else rec.checkins.push(d);
+          row.classList.toggle('got', !willBeOn);
+          if(markEl) markEl.textContent = !willBeOn ? '✅ 출석' : '—';
+          const revertStats = sundayStats(new Set(rec.checkins), state._calMonth);
+          if(summaryEl) summaryEl.innerHTML = `이번 달 출석 <b style="color:var(--indigo); font-size:15px;">${revertStats.got}</b> / ${revertStats.elapsed}주`;
+          toast('저장에 실패했어요. 다시 시도해 주세요.');
+        }
+      };
+    });
+
+    ['absence','visit','etc'].forEach(t=>{
+      document.getElementById('type-'+t).onclick = function(){
+        state._noteType = t;
+        panel.querySelectorAll('.radio-opt[data-type]').forEach(el=>el.classList.remove('on'));
+        this.classList.add('on');
+      };
+    });
+    document.getElementById('note-save').onclick = async function(){
+      const btn = this;
+      const date = document.getElementById('note-date').value || todayStr();
+      const content = document.getElementById('note-content').value.trim();
+      if(!content){ toast('내용을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        if(!rec.notes) rec.notes = [];
+        rec.notes.push({ id: uid(), type: state._noteType, date, content, author: state.teacherName, createdAt: Date.now() });
+        const ok = await updateKid(grade, cls, name, { checkins: rec.checkins, notes: rec.notes });
+        if(ok){ toast('기록을 저장했어요.'); renderKidDetail(panel); }
+      });
+    };
+    panel.querySelectorAll('#note-list .del-x').forEach(b=>{
+      b.onclick = async () => {
+        rec.notes = (rec.notes||[]).filter(n=>n.id!==b.dataset.id);
+        const ok = await updateKid(grade, cls, name, { checkins: rec.checkins, notes: rec.notes });
+        if(ok){ toast('삭제했어요.'); renderKidDetail(panel); }
+      };
+    });
+  }
+
+  async function renderStats(panel){
+    if(!state._statsMonth) state._statsMonth = monthKey(todayStr());
+    let all;
+    try {
+      all = await loadAllKids();
+    } catch(e){
+      panel.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-stats" style="margin-top:10px;">다시 시도</button></div>`;
+      document.getElementById('retry-stats').onclick = () => renderStats(panel);
+      return;
+    }
+    const groups = groupByClass(all);
+    const thisSunday = getThisSunday();
+    const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
+    const overallRate = all.length ? Math.round((presentTotal/all.length)*100) : 0;
+
+    const classRates = groups.map(g=>{
+      let got=0, possible=0;
+      g.kids.forEach(k=>{
+        const st = sundayStats(new Set(k.checkins), state._statsMonth);
+        got += st.got; possible += st.elapsed;
+      });
+      const pct = possible ? Math.round((got/possible)*100) : 0;
+      return { label: classLabel(g.grade,g.cls), pct, got, possible, count: g.kids.length };
+    });
+
+    const last8 = getLastNSundays(8);
+    const weekBars = last8.map(ds=>{
+      const present = all.filter(k=>k.checkins.includes(ds)).length;
+      const pct = all.length ? Math.round((present/all.length)*100) : 0;
+      return { date: ds, present, pct };
+    });
+
+    panel.innerHTML = `
+      <div class="section-title serif">통계</div>
+      <div class="section-desc">전체 출석 현황과 반별 추이를 한눈에 확인해요.</div>
+
+      <div class="stat-box">
+        <div class="sb"><b>${presentTotal}/${all.length}</b><span>이번 주일 전체 출석</span></div>
+        <div class="sb"><b>${overallRate}%</b><span>이번 주일 출석률</span></div>
+        <div class="sb"><b>${groups.length}개</b><span>등록된 반</span></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title serif" style="font-size:15.5px;">최근 8주 전체 출석 추이</div>
+        <div class="chart-bars">
+          ${weekBars.map(w=>`
+            <div class="bar-col">
+              <span class="bar-pct">${w.pct}%</span>
+              <div class="bar-fill" style="height:${Math.max(w.pct,3)}%"></div>
+              <span class="bar-label">${fmtShort(w.date)}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="month-picker">
+          <button class="navbtn" id="sm-prev">‹</button>
+          <div class="cal-title">${monthLabel(state._statsMonth)} 반별 출석률</div>
+          <button class="navbtn" id="sm-next">›</button>
+        </div>
+        ${classRates.length ? classRates.map(c=>`
+          <div class="rate-row">
+            <div class="rate-top"><span>${esc(c.label)} <span style="color:var(--ink-soft); font-weight:400;">(${c.count}명)</span></span><span class="pct">${c.pct}%</span></div>
+            <div class="rate-track"><div class="rate-fill" style="width:${c.pct}%"></div></div>
+          </div>`).join('') : `<div class="empty" style="padding:20px;">등록된 반이 없어요.</div>`}
+      </div>
+    `;
+    document.getElementById('sm-prev').onclick = () => { state._statsMonth = shiftMonth(state._statsMonth,-1); renderStats(panel); };
+    document.getElementById('sm-next').onclick = () => { state._statsMonth = shiftMonth(state._statsMonth,1); renderStats(panel); };
+  }
+
+  function renderNotice(panel){
+    panel.innerHTML = `
+      <div class="section-title serif">공지사항</div>
+      <div class="section-desc">선생님들끼리 나누는 공지예요.</div>
+      <div class="card">
+        <div class="field"><label>제목</label><input id="n-title" placeholder="공지 제목"/></div>
+        <div class="field"><label>내용</label><textarea id="n-content" placeholder="공지 내용을 입력하세요"></textarea></div>
+        <button class="btn btn-primary btn-block" id="n-save">공지 올리기</button>
+      </div>
+      <div id="notice-list"><div class="empty">불러오는 중...</div></div>
+    `;
+    document.getElementById('n-save').onclick = async function(){
+      const btn = this;
+      const title = document.getElementById('n-title').value.trim();
+      const content = document.getElementById('n-content').value.trim();
+      if(!title || !content){ toast('제목과 내용을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        const ok = await saveItem('notice', { id:uid(), title, content, date:todayStr(), createdAt:Date.now(), author: state.teacherName });
+        if(ok){ toast('공지를 올렸어요.'); renderNotice(panel); }
+      });
+    };
+    loadCollection('notice').then(list=>{
+      const el = document.getElementById('notice-list');
+      if(!el) return;
+      if(list === null){
+        el.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-notice" style="margin-top:10px;">다시 시도</button></div>`;
+        const rb = document.getElementById('retry-notice'); if(rb) rb.onclick = () => renderNotice(panel);
+        return;
+      }
+      el.innerHTML = list.length ? list.map(n=>`
+        <div class="feed-card">
+          <button class="del-x" data-id="${n.id}">삭제</button>
+          <div class="feed-top"><span class="feed-title">${esc(n.title)}</span><span class="feed-date">${fmtDate(n.date)}</span></div>
+          <div class="feed-body">${esc(n.content)}</div>
+          <div class="feed-author">— ${esc(n.author||'')}</div>
+        </div>`).join('') : `<div class="empty"><div class="big">📢</div>아직 올린 공지가 없어요.</div>`;
+      el.querySelectorAll('.del-x').forEach(b=>{
+        b.onclick = async () => { await deleteItem('notice', b.dataset.id); toast('삭제했어요.'); renderNotice(panel); };
+      });
+    });
+  }
+
+  function renderQt(panel){
+    panel.innerHTML = `
+      <div class="section-title serif">QT나눔</div>
+      <div class="section-desc">선생님들끼리 나누는 말씀 묵상이에요.</div>
+      <div class="card">
+        <div class="field"><label>본문 말씀</label><input id="q-verse" placeholder="예: 요한복음 3:16"/></div>
+        <div class="field"><label>나눔 내용</label><textarea id="q-content" placeholder="묵상한 내용을 나눠 주세요" style="min-height:110px;"></textarea></div>
+        <button class="btn btn-primary btn-block" id="q-save">QT 나눔 올리기</button>
+      </div>
+      <div id="qt-list"><div class="empty">불러오는 중...</div></div>
+    `;
+    document.getElementById('q-save').onclick = async function(){
+      const btn = this;
+      const verse = document.getElementById('q-verse').value.trim();
+      const content = document.getElementById('q-content').value.trim();
+      if(!verse || !content){ toast('본문 말씀과 나눔 내용을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        const ok = await saveItem('qt', { id:uid(), verse, content, date:todayStr(), createdAt:Date.now(), author: state.teacherName, comments:[] });
+        if(ok){ toast('QT 나눔을 올렸어요.'); renderQt(panel); }
+      });
+    };
+    loadCollection('qt').then(list=>{
+      const el = document.getElementById('qt-list');
+      if(!el) return;
+      if(list === null){
+        el.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-qt" style="margin-top:10px;">다시 시도</button></div>`;
+        const rb = document.getElementById('retry-qt'); if(rb) rb.onclick = () => renderQt(panel);
+        return;
+      }
+      el.innerHTML = list.length ? list.map(q=>`
+        <div class="feed-card qt" data-id="${q.id}">
+          <button class="del-x" data-id="${q.id}">삭제</button>
+          <div class="feed-top"><span class="feed-title">${esc(q.verse)}</span><span class="feed-date">${fmtDate(q.date)}</span></div>
+          <div class="feed-body">${esc(q.content)}</div>
+          <div class="feed-author">— ${esc(q.author||'')}</div>
+          ${(q.comments||[]).map(c=>`<div class="comment"><b>${esc(c.name)}</b> · ${fmtDate(c.at)}<br/>${esc(c.text)}</div>`).join('')}
+          <div class="comment-form">
+            <input type="text" placeholder="나눔 소감을 남겨 보세요" class="qt-comment-input"/>
+            <button class="btn btn-primary btn-sm qt-comment-save">남기기</button>
+          </div>
+        </div>`).join('') : `<div class="empty"><div class="big">📖</div>아직 올린 QT 나눔이 없어요.</div>`;
+      el.querySelectorAll('.del-x').forEach(b=>{
+        b.onclick = async () => { await deleteItem('qt', b.dataset.id); toast('삭제했어요.'); renderQt(panel); };
+      });
+      el.querySelectorAll('.feed-card.qt').forEach(card=>{
+        const id = card.dataset.id;
+        card.querySelector('.qt-comment-save').onclick = async function(){
+          const btn = this;
+          const input = card.querySelector('.qt-comment-input');
+          const text = input.value.trim();
+          if(!text){ toast('내용을 입력해 주세요.'); return; }
+          await withLoading(btn, async () => {
+            const q = list.find(x=>x.id===id);
+            if(!q.comments) q.comments = [];
+            q.comments.push({ name: state.teacherName, text, at: todayStr() });
+            const ok = await saveItem('qt', q);
+            if(ok){ toast('나눔을 남겼어요.'); renderQt(panel); }
+          });
+        };
+      });
+    });
+  }
+
+  function renderPrayer(panel){
+    panel.innerHTML = `
+      <div class="section-title serif">기도제목</div>
+      <div class="section-desc">선생님들끼리 나누는 기도제목이에요.</div>
+      <div class="subtab-row">
+        <div class="subtab ${state.prayerView==='all'?'active':''}" id="sub-all">모두 함께</div>
+        <div class="subtab ${state.prayerView==='mine'?'active':''}" id="sub-mine">나의 기도제목</div>
+      </div>
+      <div class="card">
+        <div class="field"><label>제목</label><input id="p-title" placeholder="예: 이번 수련회를 위해"/></div>
+        <div class="field"><label>내용</label><textarea id="p-content" placeholder="기도제목을 자유롭게 적어 주세요"></textarea></div>
+        <div class="field"><label>공개 범위</label>
+          <div class="radio-row">
+            <div class="radio-opt on" id="vis-public">함께 나누기</div>
+            <div class="radio-opt" id="vis-private">나만 보기</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="p-save">기도제목 나누기</button>
+      </div>
+      <div id="prayer-list"><div class="empty">불러오는 중...</div></div>
+    `;
+    document.getElementById('sub-all').onclick = () => { state.prayerView='all'; renderPrayer(panel); };
+    document.getElementById('sub-mine').onclick = () => { state.prayerView='mine'; renderPrayer(panel); };
+
+    let visibility = 'public';
+    document.getElementById('vis-public').onclick = function(){ visibility='public'; this.classList.add('on'); document.getElementById('vis-private').classList.remove('on'); };
+    document.getElementById('vis-private').onclick = function(){ visibility='private'; this.classList.add('on'); document.getElementById('vis-public').classList.remove('on'); };
+    document.getElementById('p-save').onclick = async function(){
+      const btn = this;
+      const title = document.getElementById('p-title').value.trim();
+      const content = document.getElementById('p-content').value.trim();
+      if(!title || !content){ toast('제목과 내용을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        const ok = await saveItem('prayer', { id:uid(), title, content, date:todayStr(), createdAt:Date.now(), author: state.teacherName, visibility, answered:false });
+        if(ok){ toast('기도제목을 나눴어요.'); renderPrayer(panel); }
+      });
+    };
+
+    loadCollection('prayer').then(list=>{
+      const el = document.getElementById('prayer-list');
+      if(!el) return;
+      if(list === null){
+        el.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-prayer" style="margin-top:10px;">다시 시도</button></div>`;
+        const rb = document.getElementById('retry-prayer'); if(rb) rb.onclick = () => renderPrayer(panel);
+        return;
+      }
+      const filtered = state.prayerView==='mine'
+        ? list.filter(p=>p.author===state.teacherName)
+        : list.filter(p=>p.visibility==='public' || p.author===state.teacherName);
+      el.innerHTML = filtered.length ? filtered.map(p=>{
+        const mine = p.author === state.teacherName;
+        return `<div class="feed-card prayer" data-id="${p.id}">
+          ${mine ? `<button class="del-x" data-id="${p.id}">삭제</button>` : ''}
+          <div class="feed-top"><span class="feed-title">${esc(p.title)}</span><span class="feed-date">${fmtDate(p.date)}</span></div>
+          <div class="feed-meta"><span class="badge ${p.visibility==='public'?'badge-public':'badge-private'}">${p.visibility==='public'?'함께 나누기':'나만 보기'}</span> ${p.answered?'<span class="badge badge-answered">🙏 응답됨</span>':''}</div>
+          <div class="feed-body">${esc(p.content)}</div>
+          <div class="feed-author">— ${esc(p.author||'')}</div>
+          ${mine && !p.answered ? `<button class="btn btn-ghost btn-sm mark-answered" data-id="${p.id}" style="margin-top:10px;">🙏 응답받았어요</button>` : ''}
+        </div>`;
+      }).join('') : `<div class="empty"><div class="big">🙏</div>아직 나눈 기도제목이 없어요.</div>`;
+      el.querySelectorAll('.del-x').forEach(b=>{
+        b.onclick = async () => { await deleteItem('prayer', b.dataset.id); toast('삭제했어요.'); renderPrayer(panel); };
+      });
+      el.querySelectorAll('.mark-answered').forEach(b=>{
+        b.onclick = async function(){
+          const btn = this;
+          await withLoading(btn, async () => {
+            const p = list.find(x=>x.id===b.dataset.id);
+            p.answered = true; p.answeredAt = todayStr();
+            const ok = await saveItem('prayer', p);
+            if(ok){ toast('응답 감사해요! 🙏'); renderPrayer(panel); }
+          });
+        };
+      });
+    });
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
