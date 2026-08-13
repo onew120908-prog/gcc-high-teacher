@@ -1229,8 +1229,7 @@
     });
   }
 
-  async function renderStats(panel){
-    if(!state._statsMonth) state._statsMonth = monthKey(todayStr());
+   async function renderStats(panel){
     let all;
     try {
       all = await loadAllKids();
@@ -1244,16 +1243,6 @@
     const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
     const overallRate = all.length ? Math.round((presentTotal/all.length)*100) : 0;
 
-    const classRates = groups.map(g=>{
-      let got=0, possible=0;
-      g.kids.forEach(k=>{
-        const st = sundayStats(new Set(k.checkins), state._statsMonth);
-        got += st.got; possible += st.elapsed;
-      });
-      const pct = possible ? Math.round((got/possible)*100) : 0;
-      return { label: classLabel(g.grade,g.cls), pct, got, possible, count: g.kids.length };
-    });
-
     const last8 = getLastNSundays(8);
     const weekBars = last8.map(ds=>{
       const present = all.filter(k=>k.checkins.includes(ds)).length;
@@ -1261,9 +1250,35 @@
       return { date: ds, present, pct };
     });
 
+    const rosterHtml = all.length ? groups.map(g => {
+      const presentCount = g.kids.filter(k=>k.checkins.includes(thisSunday)).length;
+      const rows = g.kids.map(k => {
+        const isPresent = k.checkins.includes(thisSunday);
+        return `<tr style="border-bottom:1px solid var(--line);">
+          <td style="padding:9px 12px; font-size:13.5px;">${esc(k.name)}</td>
+          <td style="padding:9px 12px; text-align:center; font-size:13px; font-weight:700; color:${isPresent?'var(--indigo)':'var(--rose)'};">${isPresent?'✅ 출석':'❌ 결석'}</td>
+          <td style="padding:9px 12px; text-align:center; font-size:12.5px; color:var(--ink-soft);">${k.checkins.length}회</td>
+        </tr>`;
+      }).join('');
+      return `<div class="card" style="padding:0; overflow:hidden; margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--paper);">
+          <span style="font-family:'Gowun Batang',serif;font-size:14.5px;font-weight:700;color:var(--indigo-deep);">${esc(classLabel(g.grade,g.cls))}</span>
+          <span style="font-size:12.5px;color:var(--ink-soft);"><b style="color:${presentCount===g.kids.length?'var(--indigo)':'var(--ink)'}">${presentCount}</b> / ${g.kids.length}명 출석</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:var(--paper);border-bottom:1px solid var(--line);">
+            <th style="padding:6px 12px;text-align:left;font-size:11px;color:var(--ink-soft);font-weight:500;">이름</th>
+            <th style="padding:6px 12px;text-align:center;font-size:11px;color:var(--ink-soft);font-weight:500;">이번 주일</th>
+            <th style="padding:6px 12px;text-align:center;font-size:11px;color:var(--ink-soft);font-weight:500;">누적 출석</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }).join('') : `<div class="empty" style="padding:20px;"><div class="big">🧑‍🎓</div>등록된 학생이 없어요.</div>`;
+
     panel.innerHTML = `
       <div class="section-title serif">통계</div>
-      <div class="section-desc">전체 출석 현황과 반별 추이를 한눈에 확인해요.</div>
+      <div class="section-desc">전체 출석 현황을 한눈에 확인해요.</div>
 
       <div class="stat-box">
         <div class="sb"><b>${presentTotal}/${all.length}</b><span>이번 주일 전체 출석</span></div>
@@ -1283,53 +1298,11 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="month-picker">
-          <button class="navbtn" id="sm-prev">‹</button>
-          <div class="cal-title">${monthLabel(state._statsMonth)} 반별 출석률</div>
-          <button class="navbtn" id="sm-next">›</button>
-        </div>
-        ${classRates.length ? classRates.map(c=>`
-          <div class="rate-row">
-            <div class="rate-top"><span>${esc(c.label)} <span style="color:var(--ink-soft); font-weight:400;">(${c.count}명)</span></span><span class="pct">${c.pct}%</span></div>
-            <div class="rate-track"><div class="rate-fill" style="width:${c.pct}%"></div></div>
-          </div>`).join('') : `<div class="empty" style="padding:20px;">등록된 반이 없어요.</div>`}
-      </div>
-   
       <div class="section-title serif" style="font-size:16px; margin-top:4px;">이번 주일 학생 출결</div>
       <div class="section-desc" style="margin-bottom:12px;">전체 학생의 이번 주 출석 현황이에요.</div>
-      ${all.length ? groups.map(g => {
-        const presentCount = g.kids.filter(k=>k.checkins.includes(thisSunday)).length;
-        const rows = g.kids.map(k => {
-          const isPresent = k.checkins.includes(thisSunday);
-          return `<tr>
-            <td style="padding:8px 10px; font-size:13.5px;">${esc(k.name)}</td>
-            <td style="padding:8px 10px; text-align:center; font-size:13px; font-weight:700; color:${isPresent?'var(--indigo)':'var(--rose)'};">${isPresent?'✅ 출석':'❌ 결석'}</td>
-            <td style="padding:8px 10px; text-align:center; font-size:12.5px; color:var(--ink-soft);">${k.checkins.length}회</td>
-          </tr>`;
-        }).join('');
-        return `<div style="margin-bottom:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;padding:0 2px;">
-            <span style="font-family:'Gowun Batang',serif;font-size:14px;font-weight:700;color:var(--indigo-deep);">${esc(classLabel(g.grade,g.cls))}</span>
-            <span style="font-size:12px;color:var(--ink-soft);"><b style="color:var(--indigo);">${presentCount}</b>/${g.kids.length}명</span>
-          </div>
-          <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;">
-              <thead><tr style="background:var(--paper);border-bottom:1px solid var(--line);">
-                <th style="padding:6px 10px;text-align:left;font-size:11px;color:var(--ink-soft);font-weight:500;">이름</th>
-                <th style="padding:6px 10px;text-align:center;font-size:11px;color:var(--ink-soft);font-weight:500;">이번 주일</th>
-                <th style="padding:6px 10px;text-align:center;font-size:11px;color:var(--ink-soft);font-weight:500;">누적 출석</th>
-              </tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>`;
-      }).join('') : `<div class="empty" style="padding:20px;"><div class="big">🧑‍🎓</div>등록된 학생이 없어요.</div>`} `;
-    document.getElementById('sm-prev').onclick = () => { state._statsMonth = shiftMonth(state._statsMonth,-1); renderStats(panel); };
-    document.getElementById('sm-next').onclick = () => { state._statsMonth = shiftMonth(state._statsMonth,1); renderStats(panel); };
+      ${rosterHtml}
+    `;
   }
-
-  function renderNotice(panel){
     panel.innerHTML = `
       <div class="section-title serif">공지사항</div>
       <div class="section-desc">선생님들끼리 나누는 공지예요.</div>
