@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>은혜의교회 고등부 교사실</title>
+  <title>은혜의교회 고등부</title>
   <style>
   @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
@@ -240,6 +240,26 @@
   .note-item .ni-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; flex-wrap: wrap; }
   .note-item .ni-body { font-size:13.5px; line-height:1.6; white-space:pre-wrap; }
   .note-item .ni-meta { font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+
+  .grade-circles { display: flex; gap: 12px; margin-bottom: 20px; }
+  .grade-circle {
+    flex: 1; aspect-ratio: 1; border-radius: 50%;
+    border: 2px solid var(--line); background: var(--card);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: var(--shadow); transition: all .2s; padding: 8px;
+  }
+  .grade-circle:hover { border-color: var(--indigo); background: var(--indigo); }
+  .grade-circle:hover .gc-label, .grade-circle:hover .gc-sub { color: #fff !important; }
+  .grade-circle .gc-label { font-family: 'Gowun Batang', serif; font-size: 20px; font-weight: 700; color: var(--indigo-deep); }
+  .grade-circle .gc-count { font-family: 'Gowun Batang', serif; font-size: 15px; font-weight: 700; color: var(--indigo); margin: 2px 0; }
+  .grade-circle .gc-sub { font-size: 10px; color: var(--ink-soft); }
+
+  .bulk-area { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .bulk-area textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; resize: vertical; min-height: 120px; line-height: 1.7; }
+  .bulk-area textarea:focus { outline: 2px solid var(--indigo); }
+  .bulk-preview { margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 12.5px; }
+  .bulk-preview .bp-ok { color: var(--indigo-deep); padding: 2px 0; }
+  .bulk-preview .bp-err { color: var(--rose); padding: 2px 0; }
   </style>
 </head>
 <body>
@@ -295,6 +315,7 @@
     tab: 'attend',
     attendClass: null,
     attendKid: null,
+    attendGrade: null,
     prayerView: 'all',
     _calMonth: null,
     _statsMonth: null,
@@ -652,7 +673,7 @@
 
   function topbar(rightHtml){
     return `<div class="topbar">
-      <div class="brand"><div class="mark">은</div><div class="name">은혜의교회 고등부 교사실</div></div>
+      <div class="brand"><div class="mark">은</div><div class="name">은혜의교회 고등부</div></div>
       <div class="who">${rightHtml}</div>
     </div>`;
   }
@@ -716,7 +737,7 @@
       e.target.value = '';
     };
     shell.querySelectorAll('.tabbtn').forEach(b=>{
-      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; render(); };
+      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; state.attendGrade=null; render(); };
     });
     const panel = document.getElementById('panel');
     if(state.tab==='attend') renderAttend(panel);
@@ -790,28 +811,110 @@
   }
 
   async function renderAttend(panel){
-    if(state.attendClass && state.attendKid){
-      return renderKidDetail(panel);
-    }
-    if(state.attendClass){
-      return renderClassDetail(panel);
-    }
+    if(state.attendClass && state.attendKid) return renderKidDetail(panel);
+    if(state.attendClass) return renderClassDetail(panel);
+    if(state.attendGrade) return renderGradeDashboard(panel);
     return renderAttendDashboard(panel);
+  }
+
+  function parseBulkStudents(text){
+    const lines = text.split('\n').map(l=>l.trim()).filter(l=>l);
+    const students = [], errors = [];
+    lines.forEach((line, i) => {
+      const parts = line.split('\t');
+      if(parts.length < 2){ errors.push(`줄 ${i+1}: 탭으로 구분된 형식이 아니에요 — "${line}"`); return; }
+      const classStr = parts[0].trim();
+      const nameRaw = parts[1].trim();
+      const classMatch = classStr.match(/^(고[123])-?(\d+반)$/);
+      if(!classMatch){ errors.push(`줄 ${i+1}: 학년/반 형식 오류 — "${classStr}" (예: 고1-2반)`); return; }
+      const grade = classMatch[1];
+      const cls = classMatch[2];
+      const name = nameRaw.replace(/\([남여]\)$/, '').trim();
+      if(!name){ errors.push(`줄 ${i+1}: 이름이 비어 있어요`); return; }
+      students.push({ grade, cls, name });
+    });
+    return { students, errors };
+  }
+
+  function showBulkUploadModal(panel){
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(34,28,58,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 32px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 -8px 32px rgba(43,30,90,0.18);font-family:'Noto Sans KR',sans-serif;">
+        <div style="font-family:'Gowun Batang',serif;font-size:18px;font-weight:700;color:#2E2266;margin-bottom:6px;">학생 일괄 등록</div>
+        <div style="font-size:12.5px;color:#6E6690;margin-bottom:14px;line-height:1.6;">
+          아래 형식으로 한 줄에 한 명씩 붙여넣으세요.<br/>
+          <code style="background:#F3F0FC;padding:2px 6px;border-radius:4px;font-size:12px;">고1-2반[탭]윤하은(여)</code>
+        </div>
+        <textarea id="bulk-input" style="width:100%;border:1px solid #E7E1F3;border-radius:10px;padding:10px 12px;font-size:13px;font-family:'Noto Sans KR',sans-serif;resize:vertical;min-height:160px;line-height:1.8;" placeholder="고1-2반&#9;윤하은(여)&#10;고1-2반&#9;최우단(여)&#10;고2-1반&#9;홍길동"></textarea>
+        <div id="bulk-preview" style="margin-top:10px;font-size:12px;max-height:150px;overflow-y:auto;"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button id="bulk-cancel" style="flex:1;border:1px solid #E7E1F3;background:#fff;color:#6E6690;border-radius:10px;padding:11px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">취소</button>
+          <button id="bulk-confirm" style="flex:2;border:none;background:#4B3AA4;color:#fff;border-radius:10px;padding:11px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" disabled>등록하기 (0명)</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const textarea = overlay.querySelector('#bulk-input');
+    const preview = overlay.querySelector('#bulk-preview');
+    const confirmBtn = overlay.querySelector('#bulk-confirm');
+    const cancelBtn = overlay.querySelector('#bulk-cancel');
+    let parsed = { students: [], errors: [] };
+    textarea.addEventListener('input', () => {
+      parsed = parseBulkStudents(textarea.value);
+      const { students, errors } = parsed;
+      preview.innerHTML = [
+        ...students.map(s=>`<div style="color:#2E2266;padding:1px 0;">✅ ${s.grade} ${s.cls} ${s.name}</div>`),
+        ...errors.map(e=>`<div style="color:#E2637A;padding:1px 0;">⚠️ ${e}</div>`)
+      ].join('');
+      confirmBtn.textContent = `등록하기 (${students.length}명)`;
+      confirmBtn.disabled = students.length === 0;
+    });
+    cancelBtn.onclick = () => document.body.removeChild(overlay);
+    overlay.onclick = e => { if(e.target === overlay) document.body.removeChild(overlay); };
+    confirmBtn.onclick = async function(){
+      const btn = this;
+      const { students } = parsed;
+      if(!students.length) return;
+      btn.disabled = true; btn.textContent = '등록 중...';
+      const roster = await loadRoster();
+      let added = 0, skipped = 0;
+      students.forEach(s => {
+        if(findKidIndex(roster, s.grade, s.cls, s.name) >= 0){ skipped++; return; }
+        roster.push({ grade:s.grade, cls:s.cls, name:s.name, checkins:[], notes:[] });
+        added++;
+      });
+      const ok = await saveRoster(roster);
+      document.body.removeChild(overlay);
+      if(ok){
+        toast(`${added}명 등록 완료${skipped?` (중복 ${skipped}명 건너뜀)`:''}!`);
+        renderAttendDashboard(panel);
+      }
+    };
+    textarea.focus();
   }
 
   async function renderAttendDashboard(panel){
     panel.innerHTML = `
       <div class="section-title serif">출결관리</div>
-      <div class="section-desc">반을 눌러 해당 반의 출석을 등록·확인하세요. 담임 선생님은 담당 반을, 전체를 보시려면 아래에서 모든 반을 확인할 수 있어요.</div>
-      <div class="add-kid-row">
-        <select id="new-grade">${GRADES.map(g=>`<option value="${g}">${g}</option>`).join('')}</select>
-        <input type="text" id="new-cls" placeholder="반 이름 (예: 1반)"/>
-        <input type="text" id="new-kid" placeholder="학생 이름"/>
-        <button class="btn btn-primary" id="add-kid">추가</button>
+      <div class="section-desc">학년을 눌러 해당 학년의 반별 출결을 확인하세요.</div>
+
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <div class="add-kid-row" style="flex:1;min-width:200px;">
+          <select id="new-grade">${GRADES.map(g=>`<option value="${g}">${g}</option>`).join('')}</select>
+          <input type="text" id="new-cls" placeholder="반 이름 (예: 2반)"/>
+          <input type="text" id="new-kid" placeholder="학생 이름"/>
+          <button class="btn btn-primary" id="add-kid">추가</button>
+        </div>
+        <button class="btn btn-ghost" id="open-bulk" style="white-space:nowrap;align-self:flex-start;">📋 일괄 등록</button>
       </div>
+
       <div id="attend-summary"></div>
-      <div id="class-list"><div class="empty">불러오는 중...</div></div>
+      <div class="grade-circles" id="grade-circles">
+        ${GRADES.map(g=>`<div class="grade-circle" data-grade="${g}"><div class="gc-label">${g}</div><div class="gc-count">-</div><div class="gc-sub">불러오는 중</div></div>`).join('')}
+      </div>
+      <div id="class-list"></div>
     `;
+
     document.getElementById('add-kid').onclick = async function(){
       const btn = this;
       const grade = document.getElementById('new-grade').value;
@@ -825,42 +928,87 @@
       });
     };
     document.getElementById('new-kid').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('add-kid').click(); });
+    document.getElementById('open-bulk').onclick = () => showBulkUploadModal(panel);
 
     let all;
-    try {
-      all = await loadAllKids();
-    } catch(e){
-      const listEl0 = document.getElementById('class-list');
-      if(listEl0) listEl0.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요. 화면을 새로고침하거나<br/><button class="btn btn-primary btn-sm" id="retry-attend" style="margin-top:10px;">다시 시도</button></div>`;
-      const retryBtn = document.getElementById('retry-attend');
-      if(retryBtn) retryBtn.onclick = () => renderAttendDashboard(panel);
+    try { all = await loadAllKids(); }
+    catch(e){
+      const el = document.getElementById('class-list');
+      if(el) el.innerHTML = `<div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-attend" style="margin-top:10px;">다시 시도</button></div>`;
+      const rb = document.getElementById('retry-attend'); if(rb) rb.onclick = () => renderAttendDashboard(panel);
       return;
     }
+
     const thisSunday = getThisSunday();
     const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
+    const absentTotal = all.length - presentTotal;
+
     const summaryEl = document.getElementById('attend-summary');
     if(summaryEl) summaryEl.innerHTML = `
-      <div class="attend-summary">
-        <div class="box"><b>${presentTotal} / ${all.length}</b><span>이번 주일 전체 출석</span></div>
-        <div class="box"><b>${all.length - presentTotal}명</b><span>이번 주일 전체 결석</span></div>
+      <div class="attend-summary" style="margin-bottom:16px;">
+        <div class="box"><b>${all.length}명</b><span>전체 재적</span></div>
+        <div class="box"><b>${presentTotal}명</b><span>이번 주일 출석</span></div>
+        <div class="box" style="border-color:var(--rose-soft);"><b style="color:var(--rose);">${absentTotal}명</b><span>이번 주일 결석</span></div>
       </div>`;
 
-    const groups = groupByClass(all);
-    const listEl = document.getElementById('class-list');
-    if(!listEl) return;
-    listEl.innerHTML = groups.length ? groups.map(g=>{
-      const present = g.kids.filter(k=>k.checkins.includes(thisSunday)).length;
-      const absent = g.kids.length - present;
-      return `<div class="class-card" data-grade="${esc(g.grade)}" data-cls="${esc(g.cls)}">
-        <h4>${esc(classLabel(g.grade,g.cls))}</h4>
-        <div class="row">
-          <span>전체 인원 <b>${g.kids.length}명</b></span>
-          <span>이번 주일 출석 <b>${present}명</b></span>
-          <span class="absent">결석 <b>${absent}명</b></span>
-        </div>
-      </div>`;
-    }).join('') : `<div class="empty"><div class="big">🧑‍🎓</div>아직 등록된 반이 없어요.<br/>위에서 학년·반·학생 이름을 입력해 추가해 보세요.</div>`;
-    listEl.querySelectorAll('.class-card').forEach(c=>{
+    const circlesEl = document.getElementById('grade-circles');
+    if(circlesEl){
+      GRADES.forEach(g => {
+        const gradeKids = all.filter(k=>k.grade===g);
+        const present = gradeKids.filter(k=>k.checkins.includes(thisSunday)).length;
+        const circle = circlesEl.querySelector(`[data-grade="${g}"]`);
+        if(circle){
+          circle.querySelector('.gc-count').textContent = `${present}/${gradeKids.length}`;
+          circle.querySelector('.gc-sub').textContent = '출석/재적';
+        }
+      });
+      circlesEl.querySelectorAll('.grade-circle').forEach(c=>{
+        c.onclick = () => { state.attendGrade = c.dataset.grade; state._calMonth = monthKey(todayStr()); renderAttend(panel); };
+      });
+    }
+  }
+
+  async function renderGradeDashboard(panel){
+    const grade = state.attendGrade;
+    let all;
+    try { all = await loadAllKids(); }
+    catch(e){
+      panel.innerHTML = `<div class="backlink" id="back-main">← 전체 학년으로</div><div class="empty"><div class="big">⚠️</div>불러오지 못했어요.<br/><button class="btn btn-primary btn-sm" id="retry-grade" style="margin-top:10px;">다시 시도</button></div>`;
+      document.getElementById('back-main').onclick = () => { state.attendGrade=null; renderAttend(panel); };
+      document.getElementById('retry-grade').onclick = () => renderGradeDashboard(panel);
+      return;
+    }
+    const gradeKids = all.filter(k=>k.grade===grade);
+    const thisSunday = getThisSunday();
+    const presentTotal = gradeKids.filter(k=>k.checkins.includes(thisSunday)).length;
+    const groups = groupByClass(gradeKids);
+
+    panel.innerHTML = `
+      <div class="backlink" id="back-main">← 전체 학년으로</div>
+      <div class="section-title serif">${esc(grade)} 출결현황</div>
+      <div class="section-desc">반을 눌러 해당 반의 출석을 등록·확인하세요.</div>
+      <div class="attend-summary" style="margin-bottom:16px;">
+        <div class="box"><b>${gradeKids.length}명</b><span>${grade} 재적</span></div>
+        <div class="box"><b>${presentTotal}명</b><span>이번 주일 출석</span></div>
+        <div class="box" style="border-color:var(--rose-soft);"><b style="color:var(--rose);">${gradeKids.length-presentTotal}명</b><span>이번 주일 결석</span></div>
+      </div>
+      <div id="grade-class-list">
+        ${groups.length ? groups.map(g=>{
+          const present = g.kids.filter(k=>k.checkins.includes(thisSunday)).length;
+          const absent = g.kids.length - present;
+          return `<div class="class-card" data-grade="${esc(g.grade)}" data-cls="${esc(g.cls)}">
+            <h4>${esc(classLabel(g.grade,g.cls))}</h4>
+            <div class="row">
+              <span>전체 인원 <b>${g.kids.length}명</b></span>
+              <span>이번 주일 출석 <b>${present}명</b></span>
+              <span class="absent">결석 <b>${absent}명</b></span>
+            </div>
+          </div>`;
+        }).join('') : `<div class="empty"><div class="big">🧑‍🎓</div>${esc(grade)}에 등록된 반이 없어요.</div>`}
+      </div>
+    `;
+    document.getElementById('back-main').onclick = () => { state.attendGrade=null; renderAttend(panel); };
+    panel.querySelectorAll('.class-card').forEach(c=>{
       c.onclick = () => { state.attendClass = { grade:c.dataset.grade, cls:c.dataset.cls }; state._calMonth = monthKey(todayStr()); renderAttend(panel); };
     });
   }
@@ -882,7 +1030,7 @@
     const weekly = weeklyClassStats(classKids, state._calMonth);
 
     panel.innerHTML = `
-      <div class="backlink" id="back-dash">← 전체 반으로</div>
+      <div class="backlink" id="back-dash">← ${state.attendGrade ? esc(state.attendGrade)+' 반 목록으로' : '전체 학년으로'}</div>
       <div class="section-title serif">${esc(classLabel(grade,cls))}</div>
       <div class="section-desc">이번 주일 출석을 표시하고, 학생 이름을 누르면 개인별 출석 기록을 볼 수 있어요.</div>
       <div class="add-kid-row" style="grid-template-columns: 1fr auto;">
