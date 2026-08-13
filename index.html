@@ -1482,7 +1482,79 @@
     });
   }
 
-  render();
+  function showSplash(callback){
+    const el = document.createElement('div');
+    el.style.cssText = [
+      'position:fixed;inset:0;z-index:9999;',
+      'background:linear-gradient(155deg,#2E2266 0%,#4B3AA4 40%,#8C4A7A 70%,#D4607A 100%);',
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;',
+      'opacity:1;transition:opacity 0.65s ease;overflow:hidden;'
+    ].join('');
+
+    // 배경 글로우
+    const glow1 = document.createElement('div');
+    glow1.style.cssText = 'position:absolute;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(212,96,122,0.38) 0%,transparent 68%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none;';
+    const glow2 = document.createElement('div');
+    glow2.style.cssText = 'position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(243,182,90,0.18) 0%,transparent 65%);bottom:10%;right:10%;pointer-events:none;';
+
+    // 로고 마크
+    const mark = document.createElement('div');
+    mark.textContent = '은';
+    mark.style.cssText = [
+      'width:56px;height:56px;border-radius:16px;',
+      'background:rgba(255,255,255,0.15);backdrop-filter:blur(6px);',
+      'border:1.5px solid rgba(255,255,255,0.3);',
+      'display:flex;align-items:center;justify-content:center;',
+      'font-family:"Gowun Batang",serif;font-size:22px;font-weight:700;color:#fff;',
+      'margin-bottom:22px;',
+      'opacity:0;transform:scale(0.8) translateY(10px);',
+      'transition:opacity 0.6s ease 0.1s,transform 0.6s ease 0.1s;'
+    ].join('');
+
+    // 첫째 줄
+    const line1 = document.createElement('div');
+    line1.textContent = '은혜의교회 고등부';
+    line1.style.cssText = [
+      'font-family:"Gowun Batang",serif;font-size:26px;font-weight:700;color:#fff;',
+      'letter-spacing:1.5px;text-align:center;',
+      'text-shadow:0 2px 24px rgba(212,96,122,0.55);',
+      'opacity:0;transform:translateY(14px);',
+      'transition:opacity 0.7s ease 0.35s,transform 0.7s ease 0.35s;'
+    ].join('');
+
+    // 둘째 줄
+    const line2 = document.createElement('div');
+    line2.textContent = 'We go high!';
+    line2.style.cssText = [
+      'font-family:"Gowun Batang",serif;font-size:16px;font-weight:400;',
+      'color:rgba(255,255,255,0.72);letter-spacing:3px;text-align:center;',
+      'margin-top:10px;',
+      'opacity:0;transform:translateY(10px);',
+      'transition:opacity 0.7s ease 0.62s,transform 0.7s ease 0.62s;'
+    ].join('');
+
+    el.appendChild(glow1);
+    el.appendChild(glow2);
+    el.appendChild(mark);
+    el.appendChild(line1);
+    el.appendChild(line2);
+    document.body.appendChild(el);
+
+    // 등장 애니메이션
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      mark.style.opacity='1'; mark.style.transform='scale(1) translateY(0)';
+      line1.style.opacity='1'; line1.style.transform='translateY(0)';
+      line2.style.opacity='1'; line2.style.transform='translateY(0)';
+    }));
+
+    // 2.4초 후 페이드아웃
+    setTimeout(()=>{
+      el.style.opacity='0';
+      setTimeout(()=>{ el.remove(); callback(); }, 680);
+    }, 2400);
+  }
+
+  showSplash(()=>render());
 })();
 </script>
 
