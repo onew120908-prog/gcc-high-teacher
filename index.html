@@ -673,7 +673,7 @@
 
   function topbar(rightHtml){
     return `<div class="topbar">
-      <div class="brand"><div class="mark">은</div><div class="name">은혜의교회 고등부</div></div>
+      <div class="brand"><div class="name">은혜의교회 고등부</div></div>
       <div class="who">${rightHtml}</div>
     </div>`;
   }
@@ -683,7 +683,7 @@
       <div class="glow"></div>
       <div class="container" style="position:relative; z-index:1;">
         <div class="gate">
-          <h2 class="serif">교사실 입장</h2>
+          <h2 class="serif">We go high!</h2>
           <p class="hint">고등부 선생님들만 사용하는 공간이에요. 접속 코드와 이름을 입력해 주세요.</p>
           <div class="field"><label>접속 코드</label><input id="pw" type="password" placeholder="접속 코드"/></div>
           <div class="field"><label>선생님 이름</label><input id="nm" type="text" placeholder="예: 김은혜 선생님" maxlength="20"/></div>
@@ -1268,7 +1268,7 @@
       <div class="stat-box">
         <div class="sb"><b>${presentTotal}/${all.length}</b><span>이번 주일 전체 출석</span></div>
         <div class="sb"><b>${overallRate}%</b><span>이번 주일 출석률</span></div>
-        <div class="sb"><b>${groups.length}개</b><span>등록된 반</span></div>
+        <div class="sb"><b>${groups.filter(g=>g.kids.some(k=>k.checkins.includes(thisSunday))).length}개</b><span>이번 주 출결 제출 반</span></div>
       </div>
 
       <div class="card">
@@ -1497,52 +1497,36 @@
     const glow2 = document.createElement('div');
     glow2.style.cssText = 'position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(243,182,90,0.18) 0%,transparent 65%);bottom:10%;right:10%;pointer-events:none;';
 
-    // 로고 마크
-    const mark = document.createElement('div');
-    mark.textContent = '은';
-    mark.style.cssText = [
-      'width:56px;height:56px;border-radius:16px;',
-      'background:rgba(255,255,255,0.15);backdrop-filter:blur(6px);',
-      'border:1.5px solid rgba(255,255,255,0.3);',
-      'display:flex;align-items:center;justify-content:center;',
-      'font-family:"Gowun Batang",serif;font-size:22px;font-weight:700;color:#fff;',
-      'margin-bottom:22px;',
-      'opacity:0;transform:scale(0.8) translateY(10px);',
-      'transition:opacity 0.6s ease 0.1s,transform 0.6s ease 0.1s;'
-    ].join('');
-
     // 첫째 줄
     const line1 = document.createElement('div');
     line1.textContent = '은혜의교회 고등부';
     line1.style.cssText = [
-      'font-family:"Gowun Batang",serif;font-size:26px;font-weight:700;color:#fff;',
+      'font-family:"Gowun Batang",serif;font-size:36px;font-weight:700;color:#fff;',
       'letter-spacing:1.5px;text-align:center;',
       'text-shadow:0 2px 24px rgba(212,96,122,0.55);',
       'opacity:0;transform:translateY(14px);',
-      'transition:opacity 0.7s ease 0.35s,transform 0.7s ease 0.35s;'
+      'transition:opacity 0.7s ease 0.25s,transform 0.7s ease 0.25s;'
     ].join('');
 
     // 둘째 줄
     const line2 = document.createElement('div');
     line2.textContent = 'We go high!';
     line2.style.cssText = [
-      'font-family:"Gowun Batang",serif;font-size:16px;font-weight:400;',
-      'color:rgba(255,255,255,0.72);letter-spacing:3px;text-align:center;',
-      'margin-top:10px;',
+      'font-family:"Gowun Batang",serif;font-size:22px;font-weight:400;',
+      'color:rgba(255,255,255,0.78);letter-spacing:4px;text-align:center;',
+      'margin-top:14px;',
       'opacity:0;transform:translateY(10px);',
-      'transition:opacity 0.7s ease 0.62s,transform 0.7s ease 0.62s;'
+      'transition:opacity 0.7s ease 0.5s,transform 0.7s ease 0.5s;'
     ].join('');
 
     el.appendChild(glow1);
     el.appendChild(glow2);
-    el.appendChild(mark);
     el.appendChild(line1);
     el.appendChild(line2);
     document.body.appendChild(el);
 
     // 등장 애니메이션
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      mark.style.opacity='1'; mark.style.transform='scale(1) translateY(0)';
       line1.style.opacity='1'; line1.style.transform='translateY(0)';
       line2.style.opacity='1'; line2.style.transform='translateY(0)';
     }));
