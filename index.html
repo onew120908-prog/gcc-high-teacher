@@ -1504,7 +1504,6 @@ function generateAdminExcel(rows,specialRows,thisSunday){
     XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
   }
   async function renderAdminReport(panel, thisSunday){
-  async function renderAdminReport(panel, thisSunday){
     panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
     let all, reports;
     try{ [all,reports]=await Promise.all([loadAllKids(),loadCollection('weeklyReport')]); }
