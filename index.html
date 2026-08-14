@@ -537,6 +537,8 @@
   }
 
   const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers', weeklyReport: 'weeklyReports' };
+  const CLASS_TEACHERS = {'고1 1반':'이지선','고1 2반':'장혜림','고1 3반':'김이슬','고1 4반':'민병석','고1 5반':'조미홍','고1 6반':'백지민','고1 7반':'이하영','고2 1반':'정주식','고2 2반':'이정은','고2 3반':'이오성','고2 4반':'서순복','고2 5반':'이주찬','고2 6반':'박예린','고2 7반':'최현성','고3 1반':'이혜진','고3 2반':'문승연','고3 3반':'김수민','고3 4반':'주창양','고3 5반':'이상원','고3 6반':'홍성용'};
+  function getTeacher(grade,cls){ return CLASS_TEACHERS[`${grade} ${cls.replace('반','').trim()}반`.replace(/\s+/,' ')] || ''; }
   const EXCLUDED_CLASSES = [{grade:'고1',cls:'1반'},{grade:'고2',cls:'1반'},{grade:'고3',cls:'1반'}];
   function isExcluded(k){ return EXCLUDED_CLASSES.some(e=>e.grade===k.grade&&e.cls===k.cls); }
   const SPECIAL_TEACHERS = [
@@ -1333,7 +1335,7 @@
             const submitted = weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls);
             return `<button class="report-cls-btn" data-grade="${esc(g.grade)}" data-cls="${esc(g.cls)}"
               style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;margin-bottom:6px;background:${submitted?'var(--dawn-soft)':'var(--paper)'};border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);">
-              <span style="font-weight:600;">${esc(classLabel(g.grade,g.cls))}</span>
+              <span style="font-weight:600;">${esc(classLabel(g.grade,g.cls))}</span><span style="font-size:13px;color:var(--ink-soft);margin-left:8px;">${esc(getTeacher(g.grade,g.cls))}</span>
               <span style="font-size:12px;color:var(--ink-soft);">${submitted?`✅ 제출됨 · ${submitted.score}점`:`${g.kids.length}명 · 미제출`}</span>
             </button>`;
           }).join('') : `<div class="empty" style="padding:12px;">등록된 반이 없어요.</div>`}
@@ -1496,7 +1498,7 @@
             ${rows.map((r,i)=>{
               const score=r.report?.score;
               return `<tr style="border-bottom:1px solid var(--line);background:${i%2?'var(--paper)':'#fff'};">
-                <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(classLabel(r.g.grade,r.g.cls))}</td>
+                <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(classLabel(r.g.grade,r.g.cls))}<span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">${esc(getTeacher(r.g.grade,r.g.cls))}</span></td>
                 <td style="padding:8px;text-align:center;">${r.g.kids.length}</td>
                 <td style="padding:8px;text-align:center;color:var(--indigo);font-weight:700;">${r.present.length}</td>
                 <td style="padding:8px;font-size:11px;color:var(--rose);max-width:120px;word-break:keep-all;">${r.absent.map(k=>esc(k.name)).join(', ')||'-'}</td>
