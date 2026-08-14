@@ -1462,7 +1462,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
     if(sr&&sr.report){set('H',rn,sr.report.phoneVisits??0);set('I',rn,sr.acts['토요새벽']?1:0);set('J',rn,sr.acts['교사날샘']?1:0);set('K',rn,sr.acts['주일저녁']?1:0);set('L',rn,sr.acts['사랑방']?1:0);set('O',rn,sr.report.studentQt??0);}
   });
   XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
-
+}
   async function renderAdminReport(panel, thisSunday){
     panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
     let all, reports;
