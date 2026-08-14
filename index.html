@@ -537,6 +537,13 @@
   }
 
   const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers', weeklyReport: 'weeklyReports' };
+  const SPECIAL_TEACHERS = [
+    { grade: 'SL', cls: '임형준' },
+    { grade: '찬양', cls: '강병휘' },
+    { grade: '찬양', cls: '김택민' },
+    { grade: '', cls: '강병민' },
+    { grade: '', cls: '조호정' },
+  ];
   const COLLECTION_LEGACY_PREFIX = { notice: 'notice:', qt: 'qt:', prayer: 'prayer:' };
   const _collectionMigrationDone = { notice:false, qt:false, prayer:false };
   const ADMIN_PW = 'godup2024';
@@ -1328,6 +1335,18 @@
             </button>`;
           }).join('') : `<div class="empty" style="padding:12px;">등록된 반이 없어요.</div>`}
         </div>
+        <div class="card" style="margin-top:8px;">
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;font-weight:500;">특별 역할</div>
+          ${SPECIAL_TEACHERS.map(t=>{
+            const submitted = weekReports.find(r=>r.grade===t.grade&&r.cls===t.cls);
+            const label = t.grade ? `${t.grade} · ${t.cls}` : t.cls;
+            return `<button class="report-cls-btn" data-grade="${esc(t.grade)}" data-cls="${esc(t.cls)}"
+              style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;margin-bottom:6px;background:${submitted?'var(--dawn-soft)':'var(--paper)'};border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);">
+              <span style="font-weight:600;">${esc(label)}</span>
+              <span style="font-size:12px;color:var(--ink-soft);">${submitted?`✅ 제출됨 · ${submitted.score}점`:`미제출`}</span>
+            </button>`;
+          }).join('')}
+        </div>
         <button class="btn" style="width:100%;font-size:13px;" id="admin-view-btn">🔒 관리자 보고서</button>
       `;
       panel.querySelectorAll('.report-cls-btn').forEach(b=>{
@@ -1350,6 +1369,7 @@
     const reports = await loadCollection('weeklyReport').catch(()=>[]);
     const existing = Array.isArray(reports) ? reports.find(r=>r.id===reportId) : null;
     const acts = existing?.activities||{};
+    const isSpecial = SPECIAL_TEACHERS.some(t=>t.grade===grade&&t.cls===cls);
 
     panel.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -1358,7 +1378,7 @@
       </div>
       <div class="section-desc">${fmtDate(thisSunday)} 기준</div>
 
-      <div class="card">
+      ${!isSpecial ? `<div class="card">
         <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;font-weight:500;">출결 현황 (자동 연동)</div>
         <div class="stat-box" style="margin-bottom:0;">
           <div class="sb"><b>${classKids.length}</b><span>재적</span></div>
@@ -1366,7 +1386,7 @@
           <div class="sb"><b style="color:var(--rose);">${absentKids.length}</b><span>결석</span></div>
         </div>
         ${absentKids.length?`<div style="margin-top:10px;font-size:12.5px;color:var(--rose);padding:8px 12px;background:var(--rose-soft);border-radius:8px;line-height:1.6;">결석: ${absentKids.map(k=>esc(k.name)).join(', ')}</div>`:''}
-      </div>
+      </div>` : ''}
 
       <div class="card">
         <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-weight:500;">교사 활동</div>
@@ -1417,7 +1437,14 @@
     const reportList=Array.isArray(reports)?reports:[];
     const groups=groupByClass(all);
     const weekReports=reportList.filter(r=>r.week===thisSunday);
-    const totalSubmitted=groups.filter(g=>weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls)).length;
+    const specialRows=SPECIAL_TEACHERS.map(t=>{
+      const report=weekReports.find(r=>r.grade===t.grade&&r.cls===t.cls);
+      const acts=report?.activities||{};
+      const label=t.grade?`${t.grade} · ${t.cls}`:t.cls;
+      return {label,report,acts};
+    });
+    const totalSubmitted=groups.filter(g=>weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls)).length+SPECIAL_TEACHERS.filter(t=>weekReports.find(r=>r.grade===t.grade&&r.cls===t.cls)).length;
+    const totalClasses=groups.length+SPECIAL_TEACHERS.length;
 
     const rows=groups.map(g=>{
       const report=weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls);
@@ -1434,7 +1461,7 @@
         <button class="btn" id="admin-back" style="padding:6px 12px;font-size:13px;">← 뒤로</button>
         <div class="section-title serif" style="margin:0;">관리자 보고서</div>
       </div>
-      <div class="section-desc">${fmtDate(thisSunday)} · 제출 ${totalSubmitted}/${groups.length}반 · 총점 합계 ${totalScore}점</div>
+      <div class="section-desc">${fmtDate(thisSunday)} · 제출 ${totalSubmitted}/${totalClasses}반 · 총점 합계 ${totalScore}점</div>
 
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);">
         <table style="border-collapse:collapse;min-width:680px;width:100%;font-size:12.5px;background:#fff;">
@@ -1472,7 +1499,7 @@
             }).join('')}
           </tbody>
         </table>
-      </div>
+      <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은</div>
       <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은 '-' 로 표시돼요.</div>
     `;
     document.getElementById('admin-back').onclick=()=>{ state._reportAdmin=false; renderWeeklyReport(panel); };
