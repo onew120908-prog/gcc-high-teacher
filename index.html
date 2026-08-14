@@ -1461,6 +1461,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
   [{sr:specialRows[1],rn:25},{sr:specialRows[2],rn:26},{sr:specialRows[4],rn:27},{sr:specialRows[3],rn:28}].forEach(({sr,rn})=>{
     if(sr&&sr.report){set('H',rn,sr.report.phoneVisits??0);set('I',rn,sr.acts['토요새벽']?1:0);set('J',rn,sr.acts['교사날샘']?1:0);set('K',rn,sr.acts['주일저녁']?1:0);set('L',rn,sr.acts['사랑방']?1:0);set('O',rn,sr.report.studentQt??0);}
   });
+  if(!wb.Workbook)wb.Workbook={};wb.Workbook.CalcPr={fullCalcOnLoad:1};
   XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
 }
   async function renderAdminReport(panel, thisSunday){
