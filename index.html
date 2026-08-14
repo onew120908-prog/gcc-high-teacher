@@ -537,6 +537,8 @@
   }
 
   const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers', weeklyReport: 'weeklyReports' };
+  const EXCLUDED_CLASSES = [{grade:'고1',cls:'1반'},{grade:'고2',cls:'1반'},{grade:'고3',cls:'1반'}];
+  function isExcluded(k){ return EXCLUDED_CLASSES.some(e=>e.grade===k.grade&&e.cls===k.cls); }
   const SPECIAL_TEACHERS = [
     { grade: 'SL', cls: '임형준' },
     { grade: '찬양', cls: '강병휘' },
@@ -1250,13 +1252,14 @@
     }
     const groups = groupByClass(all);
     const thisSunday = getThisSunday();
-    const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
-    const overallRate = all.length ? Math.round((presentTotal/all.length)*100) : 0;
+    const counted = all.filter(k=>!isExcluded(k));
+    const presentTotal = counted.filter(k=>k.checkins.includes(thisSunday)).length;
+    const overallRate = counted.length ? Math.round((presentTotal/counted.length)*100) : 0;
 
     const last8 = getLastNSundays(8);
     const weekBars = last8.map(ds=>{
-      const present = all.filter(k=>k.checkins.includes(ds)).length;
-      const pct = all.length ? Math.round((present/all.length)*100) : 0;
+      const present = counted.filter(k=>k.checkins.includes(ds)).length;
+      const pct = counted.length ? Math.round((present/counted.length)*100) : 0;
       return { date: ds, present, pct };
     });
 
@@ -1291,7 +1294,7 @@
       <div class="section-desc">전체 출석 현황을 한눈에 확인해요.</div>
 
       <div class="stat-box">
-        <div class="sb"><b>${presentTotal}/${all.length}</b><span>이번 주일 전체 출석</span></div>
+        <div class="sb"><b>${presentTotal}/${counted.length}</b><span>이번 주일 전체 출석</span></div>
         <div class="sb"><b>${overallRate}%</b><span>이번 주일 출석률</span></div>
         <div class="sb"><b>${groups.filter(g=>g.kids.some(k=>k.checkins.includes(thisSunday))).length}개</b><span>이번 주 출결 제출 반</span></div>
       </div>
@@ -1455,6 +1458,15 @@
     });
 
     const totalScore=weekReports.reduce((s,r)=>s+(r.score||0),0);
+    const sumEnrolled=rows.reduce((s,r)=>s+r.g.kids.length,0);
+    const sumPresent=rows.reduce((s,r)=>s+r.present.length,0);
+    const sumVisits=weekReports.reduce((s,r)=>s+(r.phoneVisits||0),0);
+    const sum토새=weekReports.filter(r=>r.activities?.['토요새벽']).length;
+    const sum날샘=weekReports.filter(r=>r.activities?.['교사날샘']).length;
+    const sum주저=weekReports.filter(r=>r.activities?.['주일저녁']).length;
+    const sum사방=weekReports.filter(r=>r.activities?.['사랑방']).length;
+    const sumQt=weekReports.reduce((s,r)=>s+(r.studentQt||0),0);
+    const avgScore=weekReports.length ? Math.round(totalScore/25*10)/10 : '-';
 
     panel.innerHTML=`
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -1514,7 +1526,19 @@
             </tr>`;
           }).join('')}
           </tbody>
-        </table>
+        <tr style="background:var(--indigo-deep);color:#fff;font-weight:700;border-top:2px solid var(--indigo);">
+            <td style="padding:8px 12px;">합계/평균</td>
+            <td style="padding:8px;text-align:center;">${sumEnrolled}</td>
+            <td style="padding:8px;text-align:center;">${sumPresent}</td>
+            <td style="padding:8px;">-</td>
+            <td style="padding:8px;text-align:center;">${sumVisits}</td>
+            <td style="padding:8px;text-align:center;">${sum토새}</td>
+            <td style="padding:8px;text-align:center;">${sum날샘}</td>
+            <td style="padding:8px;text-align:center;">${sum주저}</td>
+            <td style="padding:8px;text-align:center;">${sum사방}</td>
+            <td style="padding:8px;text-align:center;">${sumQt}</td>
+            <td style="padding:8px;text-align:center;">평균 ${avgScore}점</td>
+          </tr></table>
       <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은</div>
       <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은 '-' 로 표시돼요.</div>
     `;
