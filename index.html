@@ -536,9 +536,19 @@
     return [...map.values()].sort((a,b)=> (a.grade+a.cls).localeCompare(b.grade+b.cls,'ko'));
   }
 
-  const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers' };
+  const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers', weeklyReport: 'weeklyReports' };
+  const EXCLUDED_CLASSES = [{grade:'고1',cls:'1반'},{grade:'고2',cls:'1반'},{grade:'고3',cls:'1반'}];
+  function isExcluded(k){ return EXCLUDED_CLASSES.some(e=>e.grade===k.grade&&e.cls===k.cls); }
+  const SPECIAL_TEACHERS = [
+    { grade: 'SL', cls: '임형준' },
+    { grade: '찬양', cls: '강병휘' },
+    { grade: '찬양', cls: '김택민' },
+    { grade: '', cls: '강병민' },
+    { grade: '', cls: '조호정' },
+  ];
   const COLLECTION_LEGACY_PREFIX = { notice: 'notice:', qt: 'qt:', prayer: 'prayer:' };
   const _collectionMigrationDone = { notice:false, qt:false, prayer:false };
+  const ADMIN_PW = 'godup2024';
   async function migrateLegacyCollection(type){
     try {
       const prefix = COLLECTION_LEGACY_PREFIX[type];
@@ -712,6 +722,7 @@
     const tabs = [
       ['attend','📋','출결관리'],
       ['stats','📊','통계'],
+      ['report','📝','주간보고'],
       ['notice','📢','공지사항'],
       ['qt','📖','QT나눔'],
       ['prayer','🙏','기도제목'],
@@ -737,11 +748,12 @@
       e.target.value = '';
     };
     shell.querySelectorAll('.tabbtn').forEach(b=>{
-      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; state.attendGrade=null; render(); };
+      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; state.attendGrade=null; state._reportGrade=null; state._reportCls=null; state._reportAdmin=false; render(); };
     });
     const panel = document.getElementById('panel');
     if(state.tab==='attend') renderAttend(panel);
     else if(state.tab==='stats') renderStats(panel);
+    else if(state.tab==='report') renderWeeklyReport(panel);
     else if(state.tab==='notice') renderNotice(panel);
     else if(state.tab==='qt') renderQt(panel);
     else renderPrayer(panel);
@@ -1229,8 +1241,7 @@
     });
   }
 
-  async function renderStats(panel){
-    if(!state._statsMonth) state._statsMonth = monthKey(todayStr());
+   async function renderStats(panel){
     let all;
     try {
       all = await loadAllKids();
@@ -1241,32 +1252,49 @@
     }
     const groups = groupByClass(all);
     const thisSunday = getThisSunday();
-    const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
-    const overallRate = all.length ? Math.round((presentTotal/all.length)*100) : 0;
-
-    const classRates = groups.map(g=>{
-      let got=0, possible=0;
-      g.kids.forEach(k=>{
-        const st = sundayStats(new Set(k.checkins), state._statsMonth);
-        got += st.got; possible += st.elapsed;
-      });
-      const pct = possible ? Math.round((got/possible)*100) : 0;
-      return { label: classLabel(g.grade,g.cls), pct, got, possible, count: g.kids.length };
-    });
+    const counted = all.filter(k=>!isExcluded(k));
+    const presentTotal = counted.filter(k=>k.checkins.includes(thisSunday)).length;
+    const overallRate = counted.length ? Math.round((presentTotal/counted.length)*100) : 0;
 
     const last8 = getLastNSundays(8);
     const weekBars = last8.map(ds=>{
-      const present = all.filter(k=>k.checkins.includes(ds)).length;
-      const pct = all.length ? Math.round((present/all.length)*100) : 0;
+      const present = counted.filter(k=>k.checkins.includes(ds)).length;
+      const pct = counted.length ? Math.round((present/counted.length)*100) : 0;
       return { date: ds, present, pct };
     });
 
+    const rosterHtml = all.length ? groups.map(g => {
+      const presentCount = g.kids.filter(k=>k.checkins.includes(thisSunday)).length;
+      const rows = g.kids.map(k => {
+        const isPresent = k.checkins.includes(thisSunday);
+        return `<tr style="border-bottom:1px solid var(--line);">
+          <td style="padding:9px 12px; font-size:13.5px;">${esc(k.name)}</td>
+          <td style="padding:9px 12px; text-align:center; font-size:13px; font-weight:700; color:${isPresent?'var(--indigo)':'var(--rose)'};">${isPresent?'✅ 출석':'❌ 결석'}</td>
+          <td style="padding:9px 12px; text-align:center; font-size:12.5px; color:var(--ink-soft);">${k.checkins.length}회</td>
+        </tr>`;
+      }).join('');
+      return `<div class="card" style="padding:0; overflow:hidden; margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--paper);">
+          <span style="font-family:'Gowun Batang',serif;font-size:14.5px;font-weight:700;color:var(--indigo-deep);">${esc(classLabel(g.grade,g.cls))}</span>
+          <span style="font-size:12.5px;color:var(--ink-soft);"><b style="color:${presentCount===g.kids.length?'var(--indigo)':'var(--ink)'}">${presentCount}</b> / ${g.kids.length}명 출석</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:var(--paper);border-bottom:1px solid var(--line);">
+            <th style="padding:6px 12px;text-align:left;font-size:11px;color:var(--ink-soft);font-weight:500;">이름</th>
+            <th style="padding:6px 12px;text-align:center;font-size:11px;color:var(--ink-soft);font-weight:500;">이번 주일</th>
+            <th style="padding:6px 12px;text-align:center;font-size:11px;color:var(--ink-soft);font-weight:500;">누적 출석</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }).join('') : `<div class="empty" style="padding:20px;"><div class="big">🧑‍🎓</div>등록된 학생이 없어요.</div>`;
+
     panel.innerHTML = `
       <div class="section-title serif">통계</div>
-      <div class="section-desc">전체 출석 현황과 반별 추이를 한눈에 확인해요.</div>
+      <div class="section-desc">전체 출석 현황을 한눈에 확인해요.</div>
 
       <div class="stat-box">
-        <div class="sb"><b>${presentTotal}/${all.length}</b><span>이번 주일 전체 출석</span></div>
+        <div class="sb"><b>${presentTotal}/${counted.length}</b><span>이번 주일 전체 출석</span></div>
         <div class="sb"><b>${overallRate}%</b><span>이번 주일 출석률</span></div>
         <div class="sb"><b>${groups.filter(g=>g.kids.some(k=>k.checkins.includes(thisSunday))).length}개</b><span>이번 주 출결 제출 반</span></div>
       </div>
@@ -1283,24 +1311,240 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="month-picker">
-          <button class="navbtn" id="sm-prev">‹</button>
-          <div class="cal-title">${monthLabel(state._statsMonth)} 반별 출석률</div>
-          <button class="navbtn" id="sm-next">›</button>
-        </div>
-        ${classRates.length ? classRates.map(c=>`
-          <div class="rate-row">
-            <div class="rate-top"><span>${esc(c.label)} <span style="color:var(--ink-soft); font-weight:400;">(${c.count}명)</span></span><span class="pct">${c.pct}%</span></div>
-            <div class="rate-track"><div class="rate-fill" style="width:${c.pct}%"></div></div>
-          </div>`).join('') : `<div class="empty" style="padding:20px;">등록된 반이 없어요.</div>`}
-      </div>
+      <div class="section-title serif" style="font-size:16px; margin-top:4px;">이번 주일 학생 출결</div>
+      <div class="section-desc" style="margin-bottom:12px;">전체 학생의 이번 주 출석 현황이에요.</div>
+      ${rosterHtml}
     `;
-    document.getElementById('sm-prev').onclick = () => { state._statsMonth = shiftMonth(state._statsMonth,-1); renderStats(panel); };
-    document.getElementById('sm-next').onclick = () => { state._statsMonth = shiftMonth(state._statsMonth,1); renderStats(panel); };
+  }
+       async function renderWeeklyReport(panel){
+    const thisSunday = getThisSunday();
+    if(state._reportAdmin){ await renderAdminReport(panel, thisSunday); return; }
+
+    if(state._reportGrade === null || state._reportGrade === undefined){
+      const all = await loadAllKids().catch(()=>[]);
+      const groups = groupByClass(all);
+      const reports = await loadCollection('weeklyReport').catch(()=>[]);
+      const weekReports = Array.isArray(reports) ? reports.filter(r=>r.week===thisSunday) : [];
+      panel.innerHTML = `
+        <div class="section-title serif">주간보고</div>
+        <div class="section-desc">${fmtDate(thisSunday)} 기준 · 담당 반을 선택해 활동을 입력해요.</div>
+        <div class="card">
+          ${groups.length ? groups.map(g=>{
+            const submitted = weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls);
+            return `<button class="report-cls-btn" data-grade="${esc(g.grade)}" data-cls="${esc(g.cls)}"
+              style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;margin-bottom:6px;background:${submitted?'var(--dawn-soft)':'var(--paper)'};border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);">
+              <span style="font-weight:600;">${esc(classLabel(g.grade,g.cls))}</span>
+              <span style="font-size:12px;color:var(--ink-soft);">${submitted?`✅ 제출됨 · ${submitted.score}점`:`${g.kids.length}명 · 미제출`}</span>
+            </button>`;
+          }).join('') : `<div class="empty" style="padding:12px;">등록된 반이 없어요.</div>`}
+        </div>
+        <div class="card" style="margin-top:8px;">
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;font-weight:500;">특별 역할</div>
+          ${SPECIAL_TEACHERS.map(t=>{
+            const submitted = weekReports.find(r=>r.grade===t.grade&&r.cls===t.cls);
+            const label = t.grade ? `${t.grade} · ${t.cls}` : t.cls;
+            return `<button class="report-cls-btn" data-grade="${esc(t.grade)}" data-cls="${esc(t.cls)}"
+              style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;margin-bottom:6px;background:${submitted?'var(--dawn-soft)':'var(--paper)'};border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink);">
+              <span style="font-weight:600;">${esc(label)}</span>
+              <span style="font-size:12px;color:var(--ink-soft);">${submitted?`✅ 제출됨 · ${submitted.score}점`:`미제출`}</span>
+            </button>`;
+          }).join('')}
+        </div>
+        <button class="btn" style="width:100%;font-size:13px;" id="admin-view-btn">🔒 관리자 보고서</button>
+      `;
+      panel.querySelectorAll('.report-cls-btn').forEach(b=>{
+        b.onclick = ()=>{ state._reportGrade=b.dataset.grade; state._reportCls=b.dataset.cls; renderWeeklyReport(panel); };
+      });
+      document.getElementById('admin-view-btn').onclick = ()=>{
+        const pw = prompt('관리자 비밀번호를 입력하세요');
+        if(pw===ADMIN_PW){ state._reportAdmin=true; renderWeeklyReport(panel); }
+        else if(pw!==null) toast('비밀번호가 틀렸어요.');
+      };
+      return;
+    }
+
+    const grade = state._reportGrade, cls = state._reportCls;
+    let all; try{ all=await loadAllKids(); }catch(e){ all=[]; }
+    const classKids = all.filter(k=>k.grade===grade&&k.cls===cls);
+    const presentKids = classKids.filter(k=>k.checkins.includes(thisSunday));
+    const absentKids = classKids.filter(k=>!k.checkins.includes(thisSunday));
+    const reportId = `${grade}_${cls}_${thisSunday}`;
+    const reports = await loadCollection('weeklyReport').catch(()=>[]);
+    const existing = Array.isArray(reports) ? reports.find(r=>r.id===reportId) : null;
+    const acts = existing?.activities||{};
+    const isSpecial = SPECIAL_TEACHERS.some(t=>t.grade===grade&&t.cls===cls);
+
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <button class="btn" id="report-back" style="padding:6px 12px;font-size:13px;">← 뒤로</button>
+        <div class="section-title serif" style="margin:0;">${esc(grade)} ${esc(cls)} 주간보고</div>
+      </div>
+      <div class="section-desc">${fmtDate(thisSunday)} 기준</div>
+
+      ${!isSpecial ? `<div class="card">
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;font-weight:500;">출결 현황 (자동 연동)</div>
+        <div class="stat-box" style="margin-bottom:0;">
+          <div class="sb"><b>${classKids.length}</b><span>재적</span></div>
+          <div class="sb"><b style="color:var(--indigo);">${presentKids.length}</b><span>출석</span></div>
+          <div class="sb"><b style="color:var(--rose);">${absentKids.length}</b><span>결석</span></div>
+        </div>
+        ${absentKids.length?`<div style="margin-top:10px;font-size:12.5px;color:var(--rose);padding:8px 12px;background:var(--rose-soft);border-radius:8px;line-height:1.6;">결석: ${absentKids.map(k=>esc(k.name)).join(', ')}</div>`:''}
+      </div>` : ''}
+
+      <div class="card">
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-weight:500;">교사 활동</div>
+        ${[['토요새벽',20],['교사날샘',10],['주일저녁',10],['사랑방',10]].map(([act,pt])=>`
+          <label style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;">
+            <div><span style="font-size:14px;">${act}</span><span style="font-size:12px;color:var(--ink-soft);margin-left:8px;">+${pt}점</span></div>
+            <input type="checkbox" data-act="${act}" style="width:20px;height:20px;accent-color:var(--indigo);cursor:pointer;" ${acts[act]?'checked':''}>
+          </label>`).join('')}
+      </div>
+
+      <div class="card">
+        <div class="field" style="margin-bottom:0;">
+          <label>전화심방 횟수 <span style="color:var(--ink-soft);font-weight:400;">× 5점</span></label>
+          <input type="number" id="phone-visits" min="0" value="${existing?.phoneVisits??0}" style="font-size:20px;text-align:center;font-weight:700;">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field" style="margin-bottom:0;">
+          <label>학생 큐티 명수 <span style="color:var(--ink-soft);font-weight:400;">× 10점</span></label>
+          <input type="number" id="student-qt" min="0" value="${existing?.studentQt??0}" style="font-size:20px;text-align:center;font-weight:700;">
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="report-save">저장하기</button>
+      ${existing?`<div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:8px;">마지막 저장: ${esc(existing.author||'')} · ${new Date(existing.submittedAt).toLocaleString('ko')}</div>`:''}
+    `;
+
+    document.getElementById('report-back').onclick=()=>{ state._reportGrade=null; state._reportCls=null; renderWeeklyReport(panel); };
+    document.getElementById('report-save').onclick=async function(){
+      const activities={};
+      panel.querySelectorAll('[data-act]').forEach(cb=>{ activities[cb.dataset.act]=cb.checked; });
+      const phoneVisits=parseInt(document.getElementById('phone-visits').value)||0;
+      const studentQt=parseInt(document.getElementById('student-qt').value)||0;
+      const score=phoneVisits*5+(activities['토요새벽']?20:0)+(activities['교사날샘']?10:0)+(activities['주일저녁']?10:0)+(activities['사랑방']?10:0)+studentQt*10;
+      await withLoading(this,async()=>{
+        const ok=await saveItem('weeklyReport',{ id:reportId, grade, cls, week:thisSunday, phoneVisits, activities, studentQt, score, author:state.teacherName, submittedAt:Date.now() });
+        if(ok){ toast(`저장했어요! 총 ${score}점`); state._reportGrade=null; state._reportCls=null; renderWeeklyReport(panel); }
+      });
+    };
   }
 
-  function renderNotice(panel){
+  async function renderAdminReport(panel, thisSunday){
+    panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
+    let all, reports;
+    try{ [all,reports]=await Promise.all([loadAllKids(),loadCollection('weeklyReport')]); }
+    catch(e){ panel.innerHTML=`<div class="empty"><div class="big">⚠️</div>불러오지 못했어요.</div>`; return; }
+    const reportList=Array.isArray(reports)?reports:[];
+    const groups=groupByClass(all);
+    const weekReports=reportList.filter(r=>r.week===thisSunday);
+    const specialRows=SPECIAL_TEACHERS.map(t=>{
+      const report=weekReports.find(r=>r.grade===t.grade&&r.cls===t.cls);
+      const acts=report?.activities||{};
+      const label=t.grade?`${t.grade} · ${t.cls}`:t.cls;
+      return {label,report,acts};
+    });
+    const totalSubmitted=groups.filter(g=>weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls)).length+SPECIAL_TEACHERS.filter(t=>weekReports.find(r=>r.grade===t.grade&&r.cls===t.cls)).length;
+    const totalClasses=groups.length+SPECIAL_TEACHERS.length;
+
+    const rows=groups.map(g=>{
+      const report=weekReports.find(r=>r.grade===g.grade&&r.cls===g.cls);
+      const present=g.kids.filter(k=>k.checkins.includes(thisSunday));
+      const absent=g.kids.filter(k=>!k.checkins.includes(thisSunday));
+      const acts=report?.activities||{};
+      return {g,present,absent,report,acts};
+    });
+
+    const totalScore=weekReports.reduce((s,r)=>s+(r.score||0),0);
+    const sumEnrolled=rows.reduce((s,r)=>s+r.g.kids.length,0);
+    const sumPresent=rows.reduce((s,r)=>s+r.present.length,0);
+    const sumVisits=weekReports.reduce((s,r)=>s+(r.phoneVisits||0),0);
+    const sum토새=weekReports.filter(r=>r.activities?.['토요새벽']).length;
+    const sum날샘=weekReports.filter(r=>r.activities?.['교사날샘']).length;
+    const sum주저=weekReports.filter(r=>r.activities?.['주일저녁']).length;
+    const sum사방=weekReports.filter(r=>r.activities?.['사랑방']).length;
+    const sumQt=weekReports.reduce((s,r)=>s+(r.studentQt||0),0);
+    const avgScore=weekReports.length ? Math.round(totalScore/25*10)/10 : '-';
+
+    panel.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <button class="btn" id="admin-back" style="padding:6px 12px;font-size:13px;">← 뒤로</button>
+        <div class="section-title serif" style="margin:0;">관리자 보고서</div>
+      </div>
+      <div class="section-desc">${fmtDate(thisSunday)} · 제출 ${totalSubmitted}/${totalClasses}명 · 총점 합계 ${totalScore}점</div>
+
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);">
+        <table style="border-collapse:collapse;min-width:680px;width:100%;font-size:12.5px;background:#fff;">
+          <thead>
+            <tr style="background:var(--indigo-deep);color:#fff;">
+              <th style="padding:10px 12px;text-align:left;white-space:nowrap;">학년/반</th>
+              <th style="padding:10px 8px;text-align:center;">재적</th>
+              <th style="padding:10px 8px;text-align:center;">출석</th>
+              <th style="padding:10px 8px;text-align:left;min-width:90px;">결석</th>
+              <th style="padding:10px 8px;text-align:center;">심방</th>
+              <th style="padding:10px 8px;text-align:center;">토새</th>
+              <th style="padding:10px 8px;text-align:center;">날샘</th>
+              <th style="padding:10px 8px;text-align:center;">주저</th>
+              <th style="padding:10px 8px;text-align:center;">사방</th>
+              <th style="padding:10px 8px;text-align:center;">QT</th>
+              <th style="padding:10px 12px;text-align:center;">총점</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((r,i)=>{
+              const score=r.report?.score;
+              return `<tr style="border-bottom:1px solid var(--line);background:${i%2?'var(--paper)':'#fff'};">
+                <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(classLabel(r.g.grade,r.g.cls))}</td>
+                <td style="padding:8px;text-align:center;">${r.g.kids.length}</td>
+                <td style="padding:8px;text-align:center;color:var(--indigo);font-weight:700;">${r.present.length}</td>
+                <td style="padding:8px;font-size:11px;color:var(--rose);max-width:120px;word-break:keep-all;">${r.absent.map(k=>esc(k.name)).join(', ')||'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?.phoneVisits??'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?(r.acts['토요새벽']?'✅':'❌'):'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?(r.acts['교사날샘']?'✅':'❌'):'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?(r.acts['주일저녁']?'✅':'❌'):'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?(r.acts['사랑방']?'✅':'❌'):'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}</td>
+                <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
+              </tr>`;
+            }).join('')}
+          ${specialRows.map((r,i)=>{
+            const score=r.report?.score;
+            return `<tr style="border-bottom:1px solid var(--line);background:${(rows.length+i)%2?'var(--paper)':'#fff'};">
+              <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(r.label)}</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;">-</td>
+              <td style="padding:8px;text-align:center;">${r.report?.phoneVisits??'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['토요새벽']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['교사날샘']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['주일저녁']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['사랑방']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}</td>
+              <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
+            </tr>`;
+          }).join('')}
+          <tr style="background:var(--indigo-deep);color:#fff;font-weight:700;border-top:2px solid var(--indigo);">
+            <td style="padding:8px 12px;">합계/평균</td>
+            <td style="padding:8px;text-align:center;">${sumEnrolled}</td>
+            <td style="padding:8px;text-align:center;">${sumPresent}</td>
+            <td style="padding:8px;">-</td>
+            <td style="padding:8px;text-align:center;">${sumVisits}</td>
+            <td style="padding:8px;text-align:center;">${sum토새}</td>
+            <td style="padding:8px;text-align:center;">${sum날샘}</td>
+            <td style="padding:8px;text-align:center;">${sum주저}</td>
+            <td style="padding:8px;text-align:center;">${sum사방}</td>
+            <td style="padding:8px;text-align:center;">${sumQt}</td>
+            <td style="padding:8px;text-align:center;">평균 ${avgScore}점</td>
+          </tr>
+          </tbody>
+        </table>
+      <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은 '-' 로 표시돼요.</div>
+    `;
+    document.getElementById('admin-back').onclick=()=>{ state._reportAdmin=false; renderWeeklyReport(panel); };
+  }
+function renderNotice(panel){
     panel.innerHTML = `
       <div class="section-title serif">공지사항</div>
       <div class="section-desc">선생님들끼리 나누는 공지예요.</div>
