@@ -1462,33 +1462,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
     if(sr&&sr.report){set('H',rn,sr.report.phoneVisits??0);set('I',rn,sr.acts['토요새벽']?1:0);set('J',rn,sr.acts['교사날샘']?1:0);set('K',rn,sr.acts['주일저녁']?1:0);set('L',rn,sr.acts['사랑방']?1:0);set('O',rn,sr.report.studentQt??0);}
   });
   XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
-}window.generateAdminExcel=async function(rows,specialRows,thisSunday){
-  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
-  let ab;
-  try{const resp=await fetch('/template.xlsx.xlsx');if(!resp.ok)throw new Error('x');ab=await resp.arrayBuffer();}catch(e){alert('양식 파일을 불러오지 못했어요. 파일이 업로드됐는지 확인해주세요.');return;}
-  const wb=XLSX.read(ab,{type:'array'});
-  const ws=wb.Sheets['양식'];
-  if(!ws){alert('양식 시트를 찾을 수 없어요.');return;}
-  const d=new Date(thisSunday);
-  const month=d.getMonth()+1, day=d.getDate();
-  ws['A1'].v=`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`;
-  const set=(col,rn,val)=>{if(val==null||val==='')return;if(!ws[col+rn])ws[col+rn]={};ws[col+rn].v=val;ws[col+rn].t=typeof val==='number'?'n':'s';};
-  const sl=specialRows[0];
-  if(sl&&sl.report){set('H',4,sl.report.phoneVisits??0);set('I',4,sl.acts['토요새벽']?1:0);set('J',4,sl.acts['교사날샘']?1:0);set('K',4,sl.acts['주일저녁']?1:0);set('L',4,sl.acts['사랑방']?1:0);set('O',4,sl.report.studentQt??0);}
-  const clsMap={};
-  rows.forEach(r=>{clsMap[r.g.grade+'-'+r.g.cls]=r;});
-  ['고1-1반','고1-2반','고1-3반','고1-4반','고1-5반','고1-6반','고1-7반','고2-1반','고2-2반','고2-3반','고2-4반','고2-5반','고2-6반','고2-7반','고3-1반','고3-2반','고3-3반','고3-4반','고3-5반','고3-6반'].forEach((cls,i)=>{
-    const rn=5+i, r=clsMap[cls];
-    if(!r)return;
-    set('C',rn,r.g.kids.length);set('D',rn,r.present.length);
-    if(r.absent.length)set('E',rn,r.absent.map(k=>k.name).join(', '));
-    if(r.report){set('H',rn,r.report.phoneVisits??0);set('I',rn,r.acts['토요새벽']?1:0);set('J',rn,r.acts['교사날샘']?1:0);set('K',rn,r.acts['주일저녁']?1:0);set('L',rn,r.acts['사랑방']?1:0);set('O',rn,r.report.studentQt??0);}
-  });
-  [{sr:specialRows[1],rn:25},{sr:specialRows[2],rn:26},{sr:specialRows[4],rn:27},{sr:specialRows[3],rn:28}].forEach(({sr,rn})=>{
-    if(sr&&sr.report){set('H',rn,sr.report.phoneVisits??0);set('I',rn,sr.acts['토요새벽']?1:0);set('J',rn,sr.acts['교사날샘']?1:0);set('K',rn,sr.acts['주일저녁']?1:0);set('L',rn,sr.acts['사랑방']?1:0);set('O',rn,sr.report.studentQt??0);}
-  });
-  XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
-}
+
   async function renderAdminReport(panel, thisSunday){
     panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
     let all, reports;
