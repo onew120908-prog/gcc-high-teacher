@@ -1441,7 +1441,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
   let ab;
   try{const resp=await fetch('/template.xlsx.xlsx');if(!resp.ok)throw new Error('x');ab=await resp.arrayBuffer();}catch(e){alert('양식 파일을 불러오지 못했어요. 파일이 업로드됐는지 확인해주세요.');return;}
   const wb=XLSX.read(ab,{type:'array'});
-  const ws=wb.Sheets['양식'];
+  const ws=wb.Sheets[wb.SheetNames[0]];
   if(!ws){alert('양식 시트를 찾을 수 없어요.');return;}
   const d=new Date(thisSunday);
   const month=d.getMonth()+1, day=d.getDate();
