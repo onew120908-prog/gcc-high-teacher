@@ -1,6 +1,7 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/template.xlsx.xlsx", "dest": "/template.xlsx.xlsx" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
