@@ -1436,35 +1436,38 @@
       });
     };
   }
-window.generateAdminExcel=async function(rows,specialRows,thisSunday){
+window.generateAdminExcel=function(rows,specialRows,thisSunday){
   if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
-  let ab;
-  try{
-    const resp=await fetch('/template.xlsx.xlsx');
-    if(!resp.ok) throw new Error('not found');
-    ab=await resp.arrayBuffer();
-  }catch(e){alert('양식 파일을 불러오지 못했어요.');return;}
-  const wb=XLSX.read(ab,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]];
   const d=new Date(thisSunday);
   const month=d.getMonth()+1, day=d.getDate();
-  if(ws['A1']) ws['A1'].v=`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`;
-  const setCell=(col,rn,val)=>{if(val===''||val==null)return;ws[col+rn]={v:val,t:typeof val==='number'?'n':'s'};};
+  const wb=XLSX.utils.book_new();
+  const ws={};
+  const hd=(c,r,v)=>{ws[c+r]={v,t:'s'};};
+  const nc=(c,r,v)=>{if(v==null||v==='')return;ws[c+r]={v,t:typeof v==='number'?'n':'s'};};
+  hd('A',1,`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`);
+  hd('A',2,'팀');hd('B',2,'교사');hd('C',2,'재적');hd('D',2,'출석');hd('E',2,'결석');hd('F',2,'새친구');hd('G',2,'방문심방');hd('H',2,'전화심방');hd('I',2,'토요새벽');hd('J',2,'교사날샘');hd('K',2,'주일저녁');hd('L',2,'사랑방');hd('M',2,'리허설');hd('N',2,'암송');hd('O',2,'학생QT');hd('P',2,'학생암송');hd('Q',2,'지각');hd('R',2,'총점');
   const sl=specialRows[0];
-  if(sl&&sl.report){setCell('H',4,sl.report.phoneVisits??0);setCell('I',4,sl.acts['토요새벽']?1:0);setCell('J',4,sl.acts['교사날샘']?1:0);setCell('K',4,sl.acts['주일저녁']?1:0);setCell('L',4,sl.acts['사랑방']?1:0);setCell('O',4,sl.report.studentQt??0);}
+  nc('A',3,'SL');nc('B',3,'임형준');
+  if(sl&&sl.report){nc('H',3,sl.report.phoneVisits??0);nc('I',3,sl.acts['토요새벽']?1:0);nc('J',3,sl.acts['교사날샘']?1:0);nc('K',3,sl.acts['주일저녁']?1:0);nc('L',3,sl.acts['사랑방']?1:0);nc('O',3,sl.report.studentQt??0);}
   rows.forEach((r,i)=>{
-    const rn=5+i;
-    setCell('C',rn,r.g.kids.length);
-    setCell('D',rn,r.present.length);
-    if(r.absent.length) setCell('E',rn,r.absent.map(k=>k.name).join(', '));
-    if(r.report){setCell('H',rn,r.report.phoneVisits??0);setCell('I',rn,r.acts['토요새벽']?1:0);setCell('J',rn,r.acts['교사날샘']?1:0);setCell('K',rn,r.acts['주일저녁']?1:0);setCell('L',rn,r.acts['사랑방']?1:0);setCell('O',rn,r.report.studentQt??0);}
+    const rn=4+i;
+    nc('A',rn,r.g.grade);nc('B',rn,r.g.cls);
+    nc('C',rn,r.g.kids.length);nc('D',rn,r.present.length);
+    if(r.absent.length)nc('E',rn,r.absent.map(k=>k.name).join(', '));
+    if(r.report){nc('H',rn,r.report.phoneVisits??0);nc('I',rn,r.acts['토요새벽']?1:0);nc('J',rn,r.acts['교사날샘']?1:0);nc('K',rn,r.acts['주일저녁']?1:0);nc('L',rn,r.acts['사랑방']?1:0);nc('O',rn,r.report.studentQt??0);}
   });
-  [{sr:specialRows[1],rn:25},{sr:specialRows[2],rn:26},{sr:specialRows[4],rn:27},{sr:specialRows[3],rn:28}].forEach(({sr,rn})=>{
-    if(sr&&sr.report){setCell('H',rn,sr.report.phoneVisits??0);setCell('I',rn,sr.acts['토요새벽']?1:0);setCell('J',rn,sr.acts['교사날샘']?1:0);setCell('K',rn,sr.acts['주일저녁']?1:0);setCell('L',rn,sr.acts['사랑방']?1:0);setCell('O',rn,sr.report.studentQt??0);}
+  const base=4+rows.length;
+  [{sr:specialRows[1],lbl:'찬양·강병휘'},{sr:specialRows[2],lbl:'찬양·김택민'},{sr:specialRows[4],lbl:'조호정'},{sr:specialRows[3],lbl:'강병민'}].forEach(({sr,lbl},i)=>{
+    const rn=base+i;
+    nc('B',rn,lbl);
+    if(sr&&sr.report){nc('H',rn,sr.report.phoneVisits??0);nc('I',rn,sr.acts['토요새벽']?1:0);nc('J',rn,sr.acts['교사날샘']?1:0);nc('K',rn,sr.acts['주일저녁']?1:0);nc('L',rn,sr.acts['사랑방']?1:0);nc('O',rn,sr.report.studentQt??0);}
   });
+  const lastRow=base+4;
+  ws['!ref']=`A1:R${lastRow}`;
+  ws['!cols']=[{wch:8},{wch:10},{wch:6},{wch:6},{wch:20},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:6},{wch:6}];
+  XLSX.utils.book_append_sheet(wb,ws,'주간보고');
   XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
 }
-
   async function renderAdminReport(panel, thisSunday){
     panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
     let all, reports;
