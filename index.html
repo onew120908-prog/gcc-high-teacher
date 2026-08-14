@@ -1527,9 +1527,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
       {s:{r:1,c:16},e:{r:2,c:16}},{s:{r:1,c:17},e:{r:2,c:17}},
     ];
     const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'양식');
-    XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
-  }
+    async function renderAdminReport
   async function renderAdminReport(panel, thisSunday){
     panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
     let all, reports;
