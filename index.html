@@ -1436,7 +1436,34 @@
       });
     };
   }
-window.generateAdminExcel=function(rows,specialRows,thisSunday){
+window.generateAdminExcel=async function(rows,specialRows,thisSunday){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
+  let ab;
+  try{
+    const resp=await fetch('/template.xlsx.xlsx');
+    if(!resp.ok) throw new Error('not found');
+    ab=await resp.arrayBuffer();
+  }catch(e){alert('양식 파일을 불러오지 못했어요.');return;}
+  const wb=XLSX.read(ab,{type:'array'});
+  const ws=wb.Sheets['양식'];
+  const d=new Date(thisSunday);
+  const month=d.getMonth()+1, day=d.getDate();
+  if(ws['A1']) ws['A1'].v=`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`;
+  const setCell=(col,rn,val)=>{if(val===''||val==null)return;ws[col+rn]={v:val,t:typeof val==='number'?'n':'s'};};
+  const sl=specialRows[0];
+  if(sl&&sl.report){setCell('H',4,sl.report.phoneVisits??0);setCell('I',4,sl.acts['토요새벽']?1:0);setCell('J',4,sl.acts['교사날샘']?1:0);setCell('K',4,sl.acts['주일저녁']?1:0);setCell('L',4,sl.acts['사랑방']?1:0);setCell('O',4,sl.report.studentQt??0);}
+  rows.forEach((r,i)=>{
+    const rn=5+i;
+    setCell('C',rn,r.g.kids.length);
+    setCell('D',rn,r.present.length);
+    if(r.absent.length) setCell('E',rn,r.absent.map(k=>k.name).join(', '));
+    if(r.report){setCell('H',rn,r.report.phoneVisits??0);setCell('I',rn,r.acts['토요새벽']?1:0);setCell('J',rn,r.acts['교사날샘']?1:0);setCell('K',rn,r.acts['주일저녁']?1:0);setCell('L',rn,r.acts['사랑방']?1:0);setCell('O',rn,r.report.studentQt??0);}
+  });
+  [{sr:specialRows[1],rn:25},{sr:specialRows[2],rn:26},{sr:specialRows[4],rn:27},{sr:specialRows[3],rn:28}].forEach(({sr,rn})=>{
+    if(sr&&sr.report){setCell('H',rn,sr.report.phoneVisits??0);setCell('I',rn,sr.acts['토요새벽']?1:0);setCell('J',rn,sr.acts['교사날샘']?1:0);setCell('K',rn,sr.acts['주일저녁']?1:0);setCell('L',rn,sr.acts['사랑방']?1:0);setCell('O',rn,sr.report.studentQt??0);}
+  });
+  XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
+}
     if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
     const d=new Date(thisSunday);
     const month=d.getMonth()+1, day=d.getDate();
@@ -1544,7 +1571,7 @@ window.generateAdminExcel=function(rows,specialRows,thisSunday){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
         <button class="btn" id="admin-back" style="padding:6px 12px;font-size:13px;">← 뒤로</button>
         <div class="section-title serif" style="margin:0;">관리자 보고서</div>
-        <button class="btn btn-primary" onclick="generateAdminExcel(window._adminExcelData.rows,window._adminExcelData.specialRows,window._adminExcelData.thisSunday)" style="padding:6px 12px;font-size:13px;margin-left:auto;">📥 엑셀 다운로드</button>
+        <button class="btn btn-primary" onclick="window.generateAdminExcel(window._adminExcelData.rows,window._adminExcelData.specialRows,window._adminExcelData.thisSunday)" style="padding:6px 12px;font-size:13px;margin-left:auto;">📥 엑셀 다운로드</button>
       </div>
       <div class="section-desc">${fmtDate(thisSunday)} · 제출 ${totalSubmitted}/${totalClasses}명 · 총점 합계 ${totalScore}점</div>
 
