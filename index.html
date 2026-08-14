@@ -956,13 +956,14 @@
     }
 
     const thisSunday = getThisSunday();
-    const presentTotal = all.filter(k=>k.checkins.includes(thisSunday)).length;
-    const absentTotal = all.length - presentTotal;
+    const counted = all.filter(k=>!isExcluded(k));
+    const presentTotal = counted.filter(k=>k.checkins.includes(thisSunday)).length;
+    const absentTotal = counted.length - presentTotal;
 
     const summaryEl = document.getElementById('attend-summary');
     if(summaryEl) summaryEl.innerHTML = `
       <div class="attend-summary" style="margin-bottom:16px;">
-        <div class="box"><b>${all.length}명</b><span>전체 재적</span></div>
+        <div class="box"><b>${counted.length}명</b><span>전체 재적</span></div>
         <div class="box"><b>${presentTotal}명</b><span>이번 주일 출석</span></div>
         <div class="box" style="border-color:var(--rose-soft);"><b style="color:var(--rose);">${absentTotal}명</b><span>이번 주일 결석</span></div>
       </div>`;
@@ -996,7 +997,8 @@
     }
     const gradeKids = all.filter(k=>k.grade===grade);
     const thisSunday = getThisSunday();
-    const presentTotal = gradeKids.filter(k=>k.checkins.includes(thisSunday)).length;
+    const countedGrade = gradeKids.filter(k=>!isExcluded(k));
+    const presentTotal = countedGrade.filter(k=>k.checkins.includes(thisSunday)).length;
     const groups = groupByClass(gradeKids);
 
     panel.innerHTML = `
@@ -1004,9 +1006,9 @@
       <div class="section-title serif">${esc(grade)} 출결현황</div>
       <div class="section-desc">반을 눌러 해당 반의 출석을 등록·확인하세요.</div>
       <div class="attend-summary" style="margin-bottom:16px;">
-        <div class="box"><b>${gradeKids.length}명</b><span>${grade} 재적</span></div>
+        <div class="box"><b>${countedGrade.length}명</b><span>${grade} 재적</span></div>
         <div class="box"><b>${presentTotal}명</b><span>이번 주일 출석</span></div>
-        <div class="box" style="border-color:var(--rose-soft);"><b style="color:var(--rose);">${gradeKids.length-presentTotal}명</b><span>이번 주일 결석</span></div>
+        <div class="box" style="border-color:var(--rose-soft);"><b style="color:var(--rose);">${countedGrade.length-presentTotal}명</b><span>이번 주일 결석</span></div>
       </div>
       <div id="grade-class-list">
         ${groups.length ? groups.map(g=>{
@@ -1460,8 +1462,8 @@
     });
 
     const totalScore=weekReports.reduce((s,r)=>s+(r.score||0),0);
-    const sumEnrolled=rows.reduce((s,r)=>s+r.g.kids.length,0);
-    const sumPresent=rows.reduce((s,r)=>s+r.present.length,0);
+    const sumEnrolled=rows.reduce((s,r)=>isExcluded({grade:r.g.grade,cls:r.g.cls})?s:s+r.g.kids.length,0);
+    const sumPresent=rows.reduce((s,r)=>isExcluded({grade:r.g.grade,cls:r.g.cls})?s:s+r.present.length,0);
     const sumVisits=weekReports.reduce((s,r)=>s+(r.phoneVisits||0),0);
     const sum토새=weekReports.filter(r=>r.activities?.['토요새벽']).length;
     const sum날샘=weekReports.filter(r=>r.activities?.['교사날샘']).length;
