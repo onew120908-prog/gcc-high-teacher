@@ -1464,70 +1464,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
   });
   XLSX.writeFile(wb,`고등부_주간보고_${month}월${day}일.xlsx`);
 }
-    if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
-    const d=new Date(thisSunday);
-    const month=d.getMonth()+1, day=d.getDate();
-    const actVal=(report,acts,key)=>report?(acts[key]?1:0):'';
-    const makeRow=(team,teacher,enrolled,present,absentStr,report,acts)=>[
-      team,teacher,enrolled,present,absentStr,
-      '','',
-      report?.phoneVisits??'',
-      actVal(report,acts,'토요새벽'),
-      actVal(report,acts,'교사날샘'),
-      actVal(report,acts,'주일저녁'),
-      actVal(report,acts,'사랑방'),
-      '','',
-      report?.studentQt??'',
-      '','',
-    ];
-    const dataRows=[];
-    const slRow=specialRows.find(r=>r.label.includes('임형준'));
-    if(slRow) dataRows.push(makeRow('SL','임형준','','','',slRow.report,slRow.acts));
-    for(const r of rows){
-      const team=`${r.g.grade}-${r.g.cls}`;
-      const teacher=getTeacher(r.g.grade,r.g.cls);
-      dataRows.push(makeRow(team,teacher,r.g.kids.length,r.present.length,r.absent.map(k=>k.name).join(', '),r.report,r.acts));
-    }
-    for(const r of specialRows.filter(r=>r.label.includes('강병휘')||r.label.includes('김택민'))){
-      const parts=r.label.split(' · ');
-      dataRows.push(makeRow(parts[0]||'찬양',parts[1]||r.label,'','','',r.report,r.acts));
-    }
-    for(const r of specialRows.filter(r=>r.label.includes('강병민')||r.label.includes('조호정'))){
-      dataRows.push(makeRow('',r.label,'','','',r.report,r.acts));
-    }
-    const lastRow=3+dataRows.length;
-    const allRows=[
-      [`( 고등부 )   (${month})월   (${day})일   SL : 임형준`],
-      ['팀','교사','재적','출석','결석한 친구','*새친구\n등반\n(+10점)','심방','','교사','','','','','','학생','','*지각\n-20점\n*결석\n-50점','총점'],
-      ['','','','','','','방문심방\n(+10점)','전화심방\n(+5점)','토요새벽\n(+20점)','성경읽기\n(+10점)','주일저녁\n(+10점)','사랑방\n(+10점)','리허설\n(+10점)','암송\n(+5점)','성경읽기(+10점)','암송\n(+5점)','',''],
-    ];
-    dataRows.forEach((dr,i)=>{
-      const rn=4+i;
-      allRows.push([...dr,`=(F${rn}*10)+(G${rn}*10+H${rn}*5)+(I${rn}*20+J${rn}*10+K${rn}*10+L${rn}*10+M${rn}*10+N${rn}*5)+(O${rn}*10+P${rn}*5)+Q${rn}`]);
-    });
-    allRows.push([],[]);
-    allRows.push(['교사\n재적','교사\n출석','학생\n재적','학생\n출석','학생결석','새친구','심방','','교 사','','','','','','학생','','지각(   명)','총점']);
-    allRows.push([
-      `=COUNTA(A4:A${lastRow})`,`=COUNTA(B4:B${lastRow})`,`=SUM(C4:C${lastRow})`,`=SUM(D4:D${lastRow})`,'',
-      `=SUM(F4:F${lastRow})`,'방문심방','전화심방','토요새벽','성경읽기','주일저녁','사랑방','리허설','암송','성경읽기','암송',
-      `=SUM(Q4:Q${lastRow})`,`=AVERAGE(R4:R${lastRow})`
-    ]);
-    allRows.push(['','','','','','',
-      `=SUM(G4:G${lastRow})`,`=SUM(H4:H${lastRow})`,`=SUM(I4:I${lastRow})`,`=SUM(J4:J${lastRow})`,
-      `=SUM(K4:K${lastRow})`,`=SUM(L4:L${lastRow})`,`=SUM(M4:M${lastRow})`,`=SUM(N4:N${lastRow})`,
-      `=SUM(O4:O${lastRow})`,`=SUM(P4:P${lastRow})`
-    ]);
-    const ws=XLSX.utils.aoa_to_sheet(allRows);
-    ws['!cols']=[{wch:10},{wch:8},{wch:5},{wch:5},{wch:22},{wch:6},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:6},{wch:8},{wch:6},{wch:6},{wch:10}];
-    ws['!merges']=[
-      {s:{r:0,c:0},e:{r:0,c:17}},
-      {s:{r:1,c:0},e:{r:2,c:0}},{s:{r:1,c:1},e:{r:2,c:1}},{s:{r:1,c:2},e:{r:2,c:2}},
-      {s:{r:1,c:3},e:{r:2,c:3}},{s:{r:1,c:4},e:{r:2,c:4}},{s:{r:1,c:5},e:{r:2,c:5}},
-      {s:{r:1,c:6},e:{r:1,c:7}},{s:{r:1,c:8},e:{r:1,c:13}},{s:{r:1,c:14},e:{r:1,c:15}},
-      {s:{r:1,c:16},e:{r:2,c:16}},{s:{r:1,c:17},e:{r:2,c:17}},
-    ];
-    const wb=XLSX.utils.book_new();
-    async function renderAdminReport
+
   async function renderAdminReport(panel, thisSunday){
     panel.innerHTML=`<div class="empty">불러오는 중...</div>`;
     let all, reports;
