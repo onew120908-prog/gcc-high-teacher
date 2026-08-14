@@ -1445,7 +1445,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
   if(!ws){alert('양식 시트를 찾을 수 없어요.');return;}
   const d=new Date(thisSunday);
   const month=d.getMonth()+1, day=d.getDate();
-  ws['A1'].v=`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`;
+  ws['A1'].v=`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`;delete ws['A1'].w;
   const set=(col,rn,val)=>{if(val==null||val==='')return;if(!ws[col+rn])ws[col+rn]={};ws[col+rn].v=val;ws[col+rn].t=typeof val==='number'?'n':'s';};
   const sl=specialRows[0];
   if(sl&&sl.report){set('H',4,sl.report.phoneVisits??0);set('I',4,sl.acts['토요새벽']?1:0);set('J',4,sl.acts['교사날샘']?1:0);set('K',4,sl.acts['주일저녁']?1:0);set('L',4,sl.acts['사랑방']?1:0);set('O',4,sl.report.studentQt??0);}
