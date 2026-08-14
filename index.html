@@ -1487,12 +1487,20 @@
               <th style="padding:10px 8px;text-align:center;">재적</th>
               <th style="padding:10px 8px;text-align:center;">출석</th>
               <th style="padding:10px 8px;text-align:left;min-width:90px;">결석</th>
-              <th style="padding:10px 8px;text-align:center;">심방</th>
+              <th style="padding:10px 8px;text-align:center;">새친구</th>
+              <th style="padding:10px 8px;text-align:center;">방문심방</th>
+              <th style="padding:10px 8px;text-align:center;">전화심방</th><th style="padding:10px 8px;text-align:center;">새친구</th>
+              <th style="padding:10px 8px;text-align:center;">방문심방</th>
+              <th style="padding:10px 8px;text-align:center;">전화심방</th>
               <th style="padding:10px 8px;text-align:center;">토새</th>
               <th style="padding:10px 8px;text-align:center;">날샘</th>
               <th style="padding:10px 8px;text-align:center;">주저</th>
               <th style="padding:10px 8px;text-align:center;">사방</th>
+              <th style="padding:10px 8px;text-align:center;">리허설</th>
+              <th style="padding:10px 8px;text-align:center;">암송</th>
               <th style="padding:10px 8px;text-align:center;">QT</th>
+              <th style="padding:10px 8px;text-align:center;">학생암송</th>
+              <th style="padding:10px 8px;text-align:center;">지각</th>
               <th style="padding:10px 12px;text-align:center;">총점</th>
             </tr>
           </thead>
@@ -1504,12 +1512,18 @@
                 <td style="padding:8px;text-align:center;">${r.g.kids.length}</td>
                 <td style="padding:8px;text-align:center;color:var(--indigo);font-weight:700;">${r.present.length}</td>
                 <td style="padding:8px;font-size:11px;color:var(--rose);max-width:120px;word-break:keep-all;">${r.absent.map(k=>esc(k.name)).join(', ')||'-'}</td>
+                <td style="padding:8px;text-align:center;">-</td>
+                <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;">${r.report?.phoneVisits??'-'}</td>
                 <td style="padding:8px;text-align:center;">${r.report?(r.acts['토요새벽']?'✅':'❌'):'-'}</td>
                 <td style="padding:8px;text-align:center;">${r.report?(r.acts['교사날샘']?'✅':'❌'):'-'}</td>
                 <td style="padding:8px;text-align:center;">${r.report?(r.acts['주일저녁']?'✅':'❌'):'-'}</td>
                 <td style="padding:8px;text-align:center;">${r.report?(r.acts['사랑방']?'✅':'❌'):'-'}</td>
+                <td style="padding:8px;text-align:center;">-</td>
+                <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}</td>
+                <td style="padding:8px;text-align:center;">-</td>
+                <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
               </tr>`;
             }).join('')}
@@ -1520,12 +1534,18 @@
               <td style="padding:8px;text-align:center;">-</td>
               <td style="padding:8px;text-align:center;">-</td>
               <td style="padding:8px;">-</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;text-align:center;">-</td>
               <td style="padding:8px;text-align:center;">${r.report?.phoneVisits??'-'}</td>
               <td style="padding:8px;text-align:center;">${r.report?(r.acts['토요새벽']?'✅':'❌'):'-'}</td>
               <td style="padding:8px;text-align:center;">${r.report?(r.acts['교사날샘']?'✅':'❌'):'-'}</td>
               <td style="padding:8px;text-align:center;">${r.report?(r.acts['주일저녁']?'✅':'❌'):'-'}</td>
               <td style="padding:8px;text-align:center;">${r.report?(r.acts['사랑방']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;text-align:center;">-</td>
               <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;text-align:center;">-</td>
               <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
             </tr>`;
           }).join('')}
@@ -1535,12 +1555,18 @@
             <td style="padding:8px;text-align:center;">${sumEnrolled}</td>
             <td style="padding:8px;text-align:center;">${sumPresent}</td>
             <td style="padding:8px;">-</td>
+            <td style="padding:8px;text-align:center;">-</td>
+            <td style="padding:8px;text-align:center;">-</td>
             <td style="padding:8px;text-align:center;">${sumVisits}</td>
             <td style="padding:8px;text-align:center;">${sum토새}</td>
             <td style="padding:8px;text-align:center;">${sum날샘}</td>
             <td style="padding:8px;text-align:center;">${sum주저}</td>
             <td style="padding:8px;text-align:center;">${sum사방}</td>
+            <td style="padding:8px;text-align:center;">-</td>
+            <td style="padding:8px;text-align:center;">-</td>
             <td style="padding:8px;text-align:center;">${sumQt}</td>
+            <td style="padding:8px;text-align:center;">-</td>
+            <td style="padding:8px;text-align:center;">-</td>
             <td style="padding:8px;text-align:center;">평균 ${avgScore}점</td>
           </tr></table>
       <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은</div>
