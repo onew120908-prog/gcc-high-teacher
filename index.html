@@ -1317,7 +1317,7 @@
     const thisSunday = getThisSunday();
     if(state._reportAdmin){ await renderAdminReport(panel, thisSunday); return; }
 
-    if(!state._reportGrade){
+    if(state._reportGrade === null || state._reportGrade === undefined){
       const all = await loadAllKids().catch(()=>[]);
       const groups = groupByClass(all);
       const reports = await loadCollection('weeklyReport').catch(()=>[]);
