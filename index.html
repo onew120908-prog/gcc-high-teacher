@@ -1461,7 +1461,7 @@
         <button class="btn" id="admin-back" style="padding:6px 12px;font-size:13px;">← 뒤로</button>
         <div class="section-title serif" style="margin:0;">관리자 보고서</div>
       </div>
-      <div class="section-desc">${fmtDate(thisSunday)} · 제출 ${totalSubmitted}/${totalClasses}반 · 총점 합계 ${totalScore}점</div>
+      <div class="section-desc">${fmtDate(thisSunday)} · 제출 ${totalSubmitted}/${totalClasses}명 · 총점 합계 ${totalScore}점</div>
 
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);">
         <table style="border-collapse:collapse;min-width:680px;width:100%;font-size:12.5px;background:#fff;">
@@ -1497,6 +1497,22 @@
                 <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
               </tr>`;
             }).join('')}
+          ${specialRows.map((r,i)=>{
+            const score=r.report?.score;
+            return `<tr style="border-bottom:1px solid var(--line);background:${(rows.length+i)%2?'var(--paper)':'#fff'};">
+              <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(r.label)}</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;text-align:center;">-</td>
+              <td style="padding:8px;">-</td>
+              <td style="padding:8px;text-align:center;">${r.report?.phoneVisits??'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['토요새벽']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['교사날샘']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['주일저녁']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?(r.acts['사랑방']?'✅':'❌'):'-'}</td>
+              <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}</td>
+              <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
+            </tr>`;
+          }).join('')}
           </tbody>
         </table>
       <div style="text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px;">미제출 반은</div>
