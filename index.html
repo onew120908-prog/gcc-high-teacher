@@ -1436,7 +1436,7 @@
       });
     };
   }
-function generateAdminExcel(rows,specialRows,thisSunday){
+window.generateAdminExcel=function(rows,specialRows,thisSunday){
     if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
     const d=new Date(thisSunday);
     const month=d.getMonth()+1, day=d.getDate();
