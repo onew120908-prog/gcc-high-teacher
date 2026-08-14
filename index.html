@@ -1445,7 +1445,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
     ab=await resp.arrayBuffer();
   }catch(e){alert('양식 파일을 불러오지 못했어요.');return;}
   const wb=XLSX.read(ab,{type:'array'});
-  const ws=wb.Sheets['양식'];
+  const ws=wb.Sheets[wb.SheetNames[0]];
   const d=new Date(thisSunday);
   const month=d.getMonth()+1, day=d.getDate();
   if(ws['A1']) ws['A1'].v=`( 고등부 )   (${month})월   (${(''+day).padStart(2,'0')})일   SL : 임형준`;
