@@ -739,7 +739,7 @@
       e.target.value = '';
     };
     shell.querySelectorAll('.tabbtn').forEach(b=>{
-      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; state.attendGrade=null; state._reportGrade=null; state._reportCls=null; state._reportAdmin=false; render();
+      b.onclick = () => { state.tab = b.dataset.tab; state.attendClass=null; state.attendKid=null; state.attendGrade=null; state._reportGrade=null; state._reportCls=null; state._reportAdmin=false; render(); };
     });
     const panel = document.getElementById('panel');
     if(state.tab==='attend') renderAttend(panel);
