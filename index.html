@@ -1560,14 +1560,14 @@ window.generateYearlyAttendance=async function(){
     const [grade,clsName]=cls.split('-');
     const students=all.filter(k=>k.grade===grade&&k.cls===clsName);
     if(!students.length)return;
+    const countInRate=clsName!=='1반';
     students.forEach(k=>{
       const checkinSet=new Set(k.checkins||[]);
       const row=[grade,clsName,k.name];
       sundays.forEach((s,i)=>{
         const val=checkinSet.has(s)?1:0;
         row.push(val);
-        sundayPresent[i]+=val;
-        sundayTotal[i]+=1;
+        if(countInRate){sundayPresent[i]+=val;sundayTotal[i]+=1;}
       });
       rows.push(row);
     });
