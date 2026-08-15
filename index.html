@@ -1554,22 +1554,27 @@ window.generateYearlyAttendance=async function(){
   const classOrder=['고1-1반','고1-2반','고1-3반','고1-4반','고1-5반','고1-6반','고1-7반','고2-1반','고2-2반','고2-3반','고2-4반','고2-5반','고2-6반','고2-7반','고3-1반','고3-2반','고3-3반','고3-4반','고3-5반','고3-6반'];
   const headers=['학년','반','이름',...sundays.map(s=>{const dt=new Date(s+'T00:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;})];
   const rows=[headers];
+  const sundayPresent=new Array(sundays.length).fill(0);
+  const sundayTotal=new Array(sundays.length).fill(0);
   classOrder.forEach(cls=>{
     const [grade,clsName]=cls.split('-');
     const students=all.filter(k=>k.grade===grade&&k.cls===clsName);
     if(!students.length)return;
     students.forEach(k=>{
       const checkinSet=new Set(k.checkins||[]);
-      const firstCheckin=(k.checkins||[]).slice().sort()[0];
       const row=[grade,clsName,k.name];
-      sundays.forEach(s=>{
-        if(!firstCheckin||s<firstCheckin)row.push('');
-        else row.push(checkinSet.has(s)?1:0);
+      sundays.forEach((s,i)=>{
+        const val=checkinSet.has(s)?1:0;
+        row.push(val);
+        sundayPresent[i]+=val;
+        sundayTotal[i]+=1;
       });
       rows.push(row);
     });
     rows.push(new Array(headers.length).fill(''));
   });
+  const rateRow=['','','출석률',...sundays.map((_,i)=>sundayTotal[i]>0?Math.round(sundayPresent[i]/sundayTotal[i]*1000)/10+'%':'')];
+  rows.push(rateRow);
   const ws=XLSX.utils.aoa_to_sheet(rows);
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'연간출석부');
