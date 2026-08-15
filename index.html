@@ -913,6 +913,7 @@
     panel.innerHTML = `
       <div class="section-title serif">출결관리</div>
       <div class="section-desc">학년을 눌러 해당 학년의 반별 출결을 확인하세요.</div>
+      <div style="text-align:right;margin-bottom:4px;"><button class="btn btn-ghost btn-sm" onclick="generateYearlyAttendance()">📊 연간 출석부 Excel</button></div>
 
       <div class="card" style="margin-bottom:16px;padding:14px 16px;">
         <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;margin-bottom:10px;">
@@ -1540,6 +1541,40 @@
       });
     };
   }
+window.generateYearlyAttendance=async function(){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
+  let all;
+  try{all=await loadAllKids();}catch(e){alert('데이터를 불러오지 못했어요.');return;}
+  const year=new Date().getFullYear();
+  const sundays=[];
+  const d=new Date(year,0,1);
+  while(d.getDay()!==0)d.setDate(d.getDate()+1);
+  const today=new Date();today.setHours(0,0,0,0);
+  while(d<=today){sundays.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);d.setDate(d.getDate()+7);}
+  const classOrder=['고1-1반','고1-2반','고1-3반','고1-4반','고1-5반','고1-6반','고1-7반','고2-1반','고2-2반','고2-3반','고2-4반','고2-5반','고2-6반','고2-7반','고3-1반','고3-2반','고3-3반','고3-4반','고3-5반','고3-6반'];
+  const headers=['학년','반','이름',...sundays.map(s=>{const dt=new Date(s+'T00:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;})];
+  const rows=[headers];
+  classOrder.forEach(cls=>{
+    const [grade,clsName]=cls.split('-');
+    const students=all.filter(k=>k.grade===grade&&k.cls===clsName);
+    if(!students.length)return;
+    students.forEach(k=>{
+      const checkinSet=new Set(k.checkins||[]);
+      const firstCheckin=(k.checkins||[]).slice().sort()[0];
+      const row=[grade,clsName,k.name];
+      sundays.forEach(s=>{
+        if(!firstCheckin||s<firstCheckin)row.push('');
+        else row.push(checkinSet.has(s)?1:0);
+      });
+      rows.push(row);
+    });
+    rows.push(new Array(headers.length).fill(''));
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'연간출석부');
+  XLSX.writeFile(wb,`고등부_연간출석부_${year}.xlsx`);
+};
 window.generateAdminExcel=async function(rows,specialRows,thisSunday){
   if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
   let ab;
