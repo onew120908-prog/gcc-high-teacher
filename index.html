@@ -537,7 +537,7 @@
     return [...map.values()].sort((a,b)=> (a.grade+a.cls).localeCompare(b.grade+b.cls,'ko'));
   }
 
-  const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers', weeklyReport: 'weeklyReports' };
+  const COLLECTION_KEYS = { notice: 'notices', qt: 'qts', prayer: 'prayers', weeklyReport: 'weeklyReports', newMembers: 'newMembers' };
   const CLASS_TEACHERS = {'고1 1반':'이지선','고1 2반':'장혜림','고1 3반':'김이슬','고1 4반':'민병석','고1 5반':'조미홍','고1 6반':'백지민','고1 7반':'이하영','고2 1반':'정주식','고2 2반':'이정은','고2 3반':'이오성','고2 4반':'서순복','고2 5반':'이주찬','고2 6반':'박예린','고2 7반':'최현성','고3 1반':'이혜진','고3 2반':'문승연','고3 3반':'김수민','고3 4반':'주창양','고3 5반':'이상원','고3 6반':'홍성용'};
   function getTeacher(grade,cls){ return CLASS_TEACHERS[`${grade} ${cls.replace('반','').trim()}반`.replace(/\s+/,' ')] || ''; }
   const EXCLUDED_CLASSES = [{grade:'고1',cls:'1반'},{grade:'고2',cls:'1반'},{grade:'고3',cls:'1반'}];
@@ -829,6 +829,7 @@
     if(state.attendClass && state.attendKid) return renderKidDetail(panel);
     if(state.attendClass) return renderClassDetail(panel);
     if(state.attendGrade) return renderGradeDashboard(panel);
+    if(state.attendNewMembers) return renderNewMemberDashboard(panel);
     return renderAttendDashboard(panel);
   }
 
@@ -927,7 +928,7 @@
 
       <div id="attend-summary"></div>
       <div class="grade-circles" id="grade-circles">
-        ${GRADES.map(g=>`<div class="grade-circle" data-grade="${g}"><div class="gc-label">${g}</div><div class="gc-count">-</div><div class="gc-sub">불러오는 중</div></div>`).join('')}
+        ${GRADES.map(g=>`<div class="grade-circle" data-grade="${g}"><div class="gc-label">${g}</div><div class="gc-count">-</div><div class="gc-sub">불러오는 중</div></div>`).join('')}<div class="grade-circle" id="new-member-circle"><div class="gc-label">새가족</div><div class="gc-count">-</div><div class="gc-sub">불러오는 중</div></div>
       </div>
       <div id="class-list"></div>
     `;
@@ -980,12 +981,115 @@
           circle.querySelector('.gc-sub').textContent = '출석/재적';
         }
       });
-      circlesEl.querySelectorAll('.grade-circle').forEach(c=>{
+     circlesEl.querySelectorAll('.grade-circle[data-grade]').forEach(c=>{
         c.onclick = () => { state.attendGrade = c.dataset.grade; state._calMonth = monthKey(todayStr()); renderAttend(panel); };
       });
     }
+    let newMembers = [];
+    try { newMembers = (await loadCollection('newMembers')) || []; } catch(e) {}
+    const nmToday = newMembers.filter(m => m.checkins && m.checkins.includes(thisSunday)).length;
+    const nmCircle = document.getElementById('new-member-circle');
+    if(nmCircle){
+      nmCircle.querySelector('.gc-count').textContent = `${nmToday}/${newMembers.length}`;
+      nmCircle.querySelector('.gc-sub').textContent = '오늘/총원';
+      nmCircle.onclick = () => { state.attendNewMembers = true; renderAttend(panel); };
+    }
+    const summaryEl2 = document.getElementById('attend-summary');
+    if(summaryEl2){
+      summaryEl2.innerHTML = `
+      <div class="attend-summary" style="margin-bottom:16px;">
+        <div class="box"><b>${counted.length}명</b><span>전체 재적</span></div>
+        <div class="box"><b>${presentTotal + nmToday}명</b><span>이번 주일 출석</span></div>
+        <div class="box" style="border-color:var(--rose-soft);"><b style="color:var(--rose);">${absentTotal}명</b><span>이번 주일 결석</span></div>
+      </div>`;
+    }
   }
 
+  async function renderNewMemberDashboard(panel){
+    panel.innerHTML = `<div class="backlink" id="back-nm-load">← 전체 학년으로</div><div class="empty">불러오는 중...</div>`;
+    document.getElementById('back-nm-load').onclick = () => { state.attendNewMembers = false; renderAttend(panel); };
+    const thisSunday = getThisSunday();
+    let members = [];
+    try { members = (await loadCollection('newMembers')) || []; } catch(e) {}
+    const todayCount = members.filter(m => (m.checkins||[]).includes(thisSunday)).length;
+    panel.innerHTML = `
+      <div class="backlink" id="back-nm">← 전체 학년으로</div>
+      <div class="section-title serif">새가족</div>
+      <div class="section-desc">이번 주 처음 온 학생을 등록하고 출석을 체크하세요. 3회 출석 후 반에 배정됩니다.</div>
+      <div class="card" style="margin-bottom:16px;padding:14px 16px;">
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;margin-bottom:10px;">
+          <select id="nm-grade" style="border:1px solid var(--line);border-radius:10px;padding:10px 8px;font-size:13.5px;background:var(--card);">${GRADES.map(g=>`<option value="${g}">${g}</option>`).join('')}</select>
+          <input type="text" id="nm-name" placeholder="이름" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;background:var(--card);color:var(--text);"/>
+        </div>
+        <button class="btn btn-primary" id="nm-add" style="width:100%;">새가족 등록 + 오늘 출석</button>
+      </div>
+      <div class="attend-summary" style="margin-bottom:16px;">
+        <div class="box"><b>${todayCount}명</b><span>오늘 출석</span></div>
+        <div class="box"><b>${members.length}명</b><span>총 새가족</span></div>
+      </div>
+      <div id="nm-list">
+        ${members.length === 0 ? '<div class="empty">등록된 새가족이 없어요.</div>' : members.map(m=>{
+          const cnt = (m.checkins||[]).length;
+          const isToday = (m.checkins||[]).includes(thisSunday);
+          return `<div class="class-card" style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:15px;">${esc(m.name)}</div>
+              <div style="font-size:12px;color:var(--sub);margin-top:2px;">${esc(m.grade)} · 출석 ${cnt}회${cnt>=3?' · ⭐ 반배정 예정':''}</div>
+            </div>
+            <button class="btn ${isToday?'btn-primary':'btn-ghost'} btn-sm nm-check" data-nmid="${m.id}" style="min-width:72px;">${isToday?'✓ 출석':'출석체크'}</button>
+            <button class="btn btn-ghost btn-sm nm-del" data-nmid="${m.id}" style="color:var(--rose);border-color:var(--rose-soft);">삭제</button>
+          </div>`;
+        }).join('')}
+      </div>`;
+    document.getElementById('back-nm').onclick = () => { state.attendNewMembers = false; renderAttend(panel); };
+    document.getElementById('nm-add').onclick = async function(){
+      const btn = this;
+      const grade = document.getElementById('nm-grade').value;
+      const name = document.getElementById('nm-name').value.trim();
+      if(!name){ toast('이름을 입력해 주세요.'); return; }
+      await withLoading(btn, async () => {
+        let arr = (await loadCollection('newMembers')) || [];
+        if(arr.find(m=>m.grade===grade&&m.name===name)){ toast('이미 등록된 새가족이에요.'); return; }
+        arr.push({ id:uid(), grade, name, checkins:[thisSunday] });
+        const ok = await saveCollectionArr('newMembers', arr);
+        if(ok){ toast(`${grade} ${name} 새가족 등록 및 오늘 출석 완료!`); renderNewMemberDashboard(panel); }
+        else toast('저장에 실패했어요. 다시 시도해 주세요.');
+      });
+    };
+    document.getElementById('nm-name').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('nm-add').click(); });
+    panel.querySelectorAll('.nm-check').forEach(btn=>{
+      btn.onclick = async function(){
+        const nmid = this.dataset.nmid;
+        await withLoading(this, async ()=>{
+          let arr = (await loadCollection('newMembers')) || [];
+          const m = arr.find(x=>x.id===nmid);
+          if(!m) return;
+          if(!m.checkins) m.checkins = [];
+          if(m.checkins.includes(thisSunday)){
+            m.checkins = m.checkins.filter(d=>d!==thisSunday);
+            toast('출석을 취소했어요.');
+          } else {
+            m.checkins.push(thisSunday);
+            toast('출석 완료!');
+          }
+          const ok = await saveCollectionArr('newMembers', arr);
+          if(ok) renderNewMemberDashboard(panel);
+          else toast('저장에 실패했어요.');
+        });
+      };
+    });
+    panel.querySelectorAll('.nm-del').forEach(btn=>{
+      btn.onclick = async function(){
+        const nmid = this.dataset.nmid;
+        if(!confirm('이 새가족을 삭제할까요?')) return;
+        let arr = (await loadCollection('newMembers')) || [];
+        arr = arr.filter(x=>x.id!==nmid);
+        await saveCollectionArr('newMembers', arr);
+        toast('삭제했어요.');
+        renderNewMemberDashboard(panel);
+      };
+    });
+  }
   async function renderGradeDashboard(panel){
     const grade = state.attendGrade;
     let all;
