@@ -1681,11 +1681,12 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
           <tbody>
             ${rows.map((r,i)=>{
               const score=r.report?.score;
+              const is장결=r.g.cls==='1반';
               return `<tr style="border-bottom:1px solid var(--line);background:${i%2?'var(--paper)':'#fff'};">
                 <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(classLabel(r.g.grade,r.g.cls))}<span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">${esc(getTeacher(r.g.grade,r.g.cls))}</span></td>
-                <td style="padding:8px;text-align:center;">${r.g.kids.length}</td>
-                <td style="padding:8px;text-align:center;color:var(--indigo);font-weight:700;">${r.present.length}</td>
-                <td style="padding:8px;font-size:11px;color:var(--rose);max-width:120px;word-break:keep-all;">${r.absent.map(k=>esc(k.name)).join(', ')||'-'}</td>
+                <td style="padding:8px;text-align:center;">${is장결?'-':r.g.kids.length}</td>
+                <td style="padding:8px;text-align:center;color:var(--indigo);font-weight:700;">${is장결?'-':r.present.length}</td>
+                <td style="padding:8px;font-size:11px;color:var(--rose);max-width:120px;word-break:keep-all;">${is장결?'-':r.absent.map(k=>esc(k.name)).join(', ')||'-'}</td>
                 <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;">${r.report?.phoneVisits??'-'}</td>
