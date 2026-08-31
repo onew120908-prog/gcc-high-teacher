@@ -1495,7 +1495,7 @@
         <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;font-weight:500;">출결 현황 (자동 연동)</div>
         <div class="stat-box" style="margin-bottom:0;">
           <div class="sb"><b>${classKids.length}</b><span>재적</span></div>
-          <div class="sb"><b style="color:var(--indigo);">${presentKids.length}</b><span>출석</span></div>
+          <div class="sb"><b>${presentKids.length}</b><span>출석</span></div>
           <div class="sb"><b style="color:var(--rose);">${absentKids.length}</b><span>결석</span></div>
         </div>
         ${absentKids.length?`<div style="margin-top:10px;font-size:12.5px;color:var(--rose);padding:8px 12px;background:var(--rose-soft);border-radius:8px;line-height:1.6;">결석: ${absentKids.map(k=>esc(k.name)).join(', ')}</div>`:''}
@@ -1521,6 +1521,7 @@
         <div class="field" style="margin-bottom:0;">
           <label>학생 큐티 명수 <span style="color:var(--ink-soft);font-weight:400;">× 10점</span></label>
           <input type="number" id="student-qt" min="0" value="${existing?.studentQt??0}" style="font-size:20px;text-align:center;font-weight:700;">
+          <input type="text" id="student-qt-names" placeholder="큐티 학생 이름 (쉼표로 구분)" value="${esc(existing?.studentQtNames||'')}" style="margin-top:8px;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;width:100%;box-sizing:border-box;background:var(--card);color:var(--text);">
         </div>
       </div>
 
@@ -1534,9 +1535,10 @@
       panel.querySelectorAll('[data-act]').forEach(cb=>{ activities[cb.dataset.act]=cb.checked; });
       const phoneVisits=parseInt(document.getElementById('phone-visits').value)||0;
       const studentQt=parseInt(document.getElementById('student-qt').value)||0;
+      const studentQtNames=document.getElementById('student-qt-names').value.trim();
       const score=phoneVisits*5+(activities['토요새벽']?20:0)+(activities['교사날샘']?10:0)+(activities['주일저녁']?10:0)+(activities['사랑방']?10:0)+studentQt*10;
       await withLoading(this,async()=>{
-        const ok=await saveItem('weeklyReport',{ id:reportId, grade, cls, week:thisSunday, phoneVisits, activities, studentQt, score, author:state.teacherName, submittedAt:Date.now() });
+        const ok=await saveItem('weeklyReport',{ id:reportId, grade, cls, week:thisSunday, phoneVisits, activities, studentQt, studentQtNames, score, author:state.teacherName, submittedAt:Date.now() });
         if(ok){ toast(`저장했어요! 총 ${score}점`); state._reportGrade=null; state._reportCls=null; renderWeeklyReport(panel); }
       });
     };
