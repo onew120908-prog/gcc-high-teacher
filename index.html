@@ -1704,7 +1704,6 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
             }).join('')}
           ${specialRows.map((r,i)=>{
             const score=r.report?.score;
-            const is장결=r.g.cls==='1반';
             return `<tr style="border-bottom:1px solid var(--line);background:${(rows.length+i)%2?'var(--paper)':'#fff'};">
               <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(r.label)}</td>
               <td style="padding:8px;text-align:center;">-</td>
