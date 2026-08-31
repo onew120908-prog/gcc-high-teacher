@@ -1695,7 +1695,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
                 <td style="padding:8px;text-align:center;">${r.report?(r.acts['사랑방']?'✅':'❌'):'-'}</td>
                 <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;">-</td>
-                <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}</td>
+                <td style="padding:8px;text-align:center;">${r.report?.studentQt??'-'}${r.report?.studentQtNames?`<br/><span style="font-size:10px;color:var(--ink-soft);">${esc(r.report.studentQtNames)}</span>`:''}</td>
                 <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;">-</td>
                 <td style="padding:8px;text-align:center;font-weight:700;color:${score!=null?'var(--indigo-deep)':'var(--ink-soft)'};">${score??'-'}</td>
