@@ -1600,8 +1600,8 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
   ['고1-1반','고1-2반','고1-3반','고1-4반','고1-5반','고1-6반','고1-7반','고2-1반','고2-2반','고2-3반','고2-4반','고2-5반','고2-6반','고2-7반','고3-1반','고3-2반','고3-3반','고3-4반','고3-5반','고3-6반'].forEach((cls,i)=>{
     const rn=5+i, r=clsMap[cls];
     if(!r)return;
-    set('C',rn,r.g.kids.length);set('D',rn,r.present.length);
-    if(r.absent.length)set('E',rn,r.absent.map(k=>k.name).join(', '));
+    const skip재적=cls==='고1-1반'||cls==='고2-1반'||cls==='고3-1반';
+    if(!skip재적){set('C',rn,r.g.kids.length);set('D',rn,r.present.length);if(r.absent.length)set('E',rn,r.absent.map(k=>k.name).join(', '));}
    if(r.report){const _h=r.report.phoneVisits??0,_i=r.acts['토요새벽']?1:0,_j=r.acts['교사날샘']?1:0,_k=r.acts['주일저녁']?1:0,_l=r.acts['사랑방']?1:0,_o=r.report.studentQt??0;set('H',rn,_h);set('I',rn,_i);set('J',rn,_j);set('K',rn,_k);set('L',rn,_l);set('O',rn,_o);set('R',rn,(_h*5)+(_i*20)+(_j*10)+(_k*10)+(_l*10)+(_o*10));}
   });
   [{sr:specialRows[1],rn:25},{sr:specialRows[2],rn:26},{sr:specialRows[4],rn:27},{sr:specialRows[3],rn:28}].forEach(({sr,rn})=>{
@@ -1704,6 +1704,7 @@ window.generateAdminExcel=async function(rows,specialRows,thisSunday){
             }).join('')}
           ${specialRows.map((r,i)=>{
             const score=r.report?.score;
+            const is장결=r.g.cls==='1반';
             return `<tr style="border-bottom:1px solid var(--line);background:${(rows.length+i)%2?'var(--paper)':'#fff'};">
               <td style="padding:8px 12px;white-space:nowrap;font-weight:600;">${esc(r.label)}</td>
               <td style="padding:8px;text-align:center;">-</td>
