@@ -1552,6 +1552,54 @@
       });
     };
   }
+    async function importInitialNewMembers(){
+    const initial=[
+      {name:'이준서',phone:'010-',schoolYear:'2학년',school:'선인고',attendDates:['2025-12-21','2026-01-04','2026-01-11'],checkins:['2025-12-21','2026-01-04','2026-01-11'],invitedBy:'노승혁',assignedTeacher:'1/18 졸업',notes:'',status:'graduated'},
+      {name:'이민서',phone:'010-',schoolYear:'2학년',school:'',attendDates:['2025-12-21','2026-01-04','2026-01-11'],checkins:['2025-12-21','2026-01-04','2026-01-11'],invitedBy:'이하은',assignedTeacher:'2/8 졸업(박예린T)',notes:'할머니의 영향.',status:'graduated'},
+      {name:'김하랑',phone:'',schoolYear:'2학년',school:'',attendDates:['2025-12-21','2026-01-11','2026-01-18'],checkins:['2025-12-21','2026-01-11','2026-01-18'],invitedBy:'박민정',assignedTeacher:'1/18 졸업',notes:'',status:'graduated'},
+      {name:'김한결',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-01-18','수련회참석','2026-01-25'],checkins:['2026-01-18','수련회참석','2026-01-25'],invitedBy:'김취곤',assignedTeacher:'1/25 졸업 (문승연T)',notes:'',status:'graduated'},
+      {name:'김인중',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-01-18','수련회참석','2026-02-01'],checkins:['2026-01-18','수련회참석','2026-02-01'],invitedBy:'김율곤',assignedTeacher:'2/1 졸업',notes:'',status:'graduated'},
+      {name:'정예은',phone:'010-5468-5610',schoolYear:'1학년',school:'',attendDates:['2026-01-18'],checkins:['2026-01-18'],invitedBy:'교회탐방 옴',assignedTeacher:'',notes:'타교회로 가본다고 함.',status:'active'},
+      {name:'최민준',phone:'',schoolYear:'2학년',school:'제물포고',attendDates:['2025-12-21','2026-01-25','2026-02-01'],checkins:['2025-12-21','2026-01-25','2026-02-01'],invitedBy:'윤준성',assignedTeacher:'2/8 졸업 임주경T',notes:'디어유 참석',status:'graduated'},
+      {name:'신정근',phone:'',schoolYear:'2학년',school:'제물포고',attendDates:['2025-12-21','2026-01-25','2026-02-01'],checkins:['2025-12-21','2026-01-25','2026-02-01'],invitedBy:'윤준성',assignedTeacher:'2/8 졸업 임주경T',notes:'디어유 참석',status:'graduated'},
+      {name:'황예린',phone:'',schoolYear:'1학년',school:'',attendDates:['2026-01-25'],checkins:['2026-01-25'],invitedBy:'김세현',assignedTeacher:'',notes:'',status:'active'},
+      {name:'박민영',phone:'',schoolYear:'2학년',school:'',attendDates:['2026-03-01'],checkins:['2026-03-01'],invitedBy:'강해주',assignedTeacher:'3월1일 졸업 (정은T)',notes:'',status:'graduated'},
+      {name:'이준승',phone:'',schoolYear:'2학년',school:'제물포고',attendDates:['2026-03-15','2026-03-29','2026-04-05'],checkins:['2026-03-15','2026-03-29','2026-04-05'],invitedBy:'윤준성',assignedTeacher:'4/12 졸업 임주경T',notes:'디어유 참석',status:'graduated'},
+      {name:'조민정',phone:'',schoolYear:'2학년',school:'',attendDates:['2026-04-26','2026-05-10'],checkins:['2026-04-26','2026-05-10'],invitedBy:'이도윤',assignedTeacher:'',notes:'',status:'active'},
+      {name:'오선준',phone:'',schoolYear:'1학년',school:'',attendDates:['2026-05-10'],checkins:['2026-05-10'],invitedBy:'하연우',assignedTeacher:'',notes:'',status:'active'},
+      {name:'박민제',phone:'',schoolYear:'1학년',school:'',attendDates:['2026-05-10'],checkins:['2026-05-10'],invitedBy:'하연우',assignedTeacher:'',notes:'',status:'active'},
+      {name:'서윤미',phone:'',schoolYear:'2학년',school:'',attendDates:['2026-05-31','2026-06-07','2026-06-14'],checkins:['2026-05-31','2026-06-07','2026-06-14'],invitedBy:'엄마와 함께 등록',assignedTeacher:'6/21 졸업 정은T',notes:'',status:'graduated'},
+      {name:'변준서',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-06-07','2026-06-14','2026-07-05'],checkins:['2026-06-07','2026-06-14','2026-07-05'],invitedBy:'최하민',assignedTeacher:'7/12 졸업 성용T',notes:'',status:'graduated'},
+      {name:'김해찬',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-06-07'],checkins:['2026-06-07'],invitedBy:'',assignedTeacher:'',notes:'',status:'active'},
+      {name:'강지호',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-06-07','2026-06-14','2026-06-21'],checkins:['2026-06-07','2026-06-14','2026-06-21'],invitedBy:'한준호',assignedTeacher:'6/27 졸업 성용T',notes:'',status:'graduated'},
+      {name:'오환철',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-06-14','2026-06-28','2026-07-05'],checkins:['2026-06-14','2026-06-28','2026-07-05'],invitedBy:'한예준',assignedTeacher:'07/12 졸업 찬양T',notes:'',status:'graduated'},
+      {name:'변서현',phone:'',schoolYear:'2학년',school:'',attendDates:['2026-06-14','2026-06-28'],checkins:['2026-06-14','2026-06-28'],invitedBy:'박민정',assignedTeacher:'',notes:'',status:'active'},
+      {name:'차대한',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-06-07','2026-07-12','수련회참석'],checkins:['2026-06-07','2026-07-12','수련회참석'],invitedBy:'한준호',assignedTeacher:'8/9 졸업',notes:'코로나전 우리교회 출석.',status:'graduated'},
+      {name:'이재윤',phone:'',schoolYear:'3학년',school:'학익고',attendDates:['2026-07-12','2026-07-26','2026-08-02'],checkins:['2026-07-12','2026-07-26','2026-08-02'],invitedBy:'김해중',assignedTeacher:'8/9 졸업',notes:'교회에 대해 알고 싶어 옴.',status:'graduated'},
+      {name:'정인영',phone:'',schoolYear:'',school:'',attendDates:['2026-07-26','2026-08-02'],checkins:['2026-07-26','2026-08-02'],invitedBy:'',assignedTeacher:'',notes:'',status:'active'},
+      {name:'김민정',phone:'1066726200',schoolYear:'2학년',school:'영화국제고',attendDates:['2026-08-09'],checkins:['2026-08-09'],invitedBy:'노한슬,강해주',assignedTeacher:'',notes:'',status:'active'},
+      {name:'우하빈',phone:'010-4337-6884',schoolYear:'2학년',school:'인성여고',attendDates:['2026-08-09'],checkins:['2026-08-09'],invitedBy:'노한슬,강해주',assignedTeacher:'',notes:'아버님이 목사님,우리교회는 궁금해서 와봄.',status:'active'},
+      {name:'공문성',phone:'010-8407-1626',schoolYear:'2학년',school:'미들청 청년',attendDates:['2026-08-09','2026-08-23','2026-08-30'],checkins:['2026-08-09','2026-08-23','2026-08-30'],invitedBy:'',assignedTeacher:'',notes:'자주 졸업예정',status:'active'},
+      {name:'이수혁',phone:'010-5649-4414',schoolYear:'2학년',school:'제물포고',attendDates:['2026-08-09'],checkins:['2026-08-09'],invitedBy:'공문성친구',assignedTeacher:'',notes:'',status:'active'},
+      {name:'임은찬',phone:'010-7578-3825',schoolYear:'2학년',school:'제물포고',attendDates:['2026-08-09'],checkins:['2026-08-09'],invitedBy:'공문성친구',assignedTeacher:'',notes:'',status:'active'},
+      {name:'차요한',phone:'010-8652-4731',schoolYear:'1학년',school:'학익고',attendDates:['2026-08-09','2026-08-16','2026-08-23'],checkins:['2026-08-09','2026-08-16','2026-08-23'],invitedBy:'차대한 동생,유야명',assignedTeacher:'',notes:'코로나전 우리교회 다녔음. 부모님신앙생활 하시며 전폭과 영접기도 완료.',status:'active'},
+      {name:'김하운',phone:'010-2300-7822',address:'용현5동',schoolYear:'1학년',school:'학익고',attendDates:['2026-08-09'],checkins:['2026-08-09'],invitedBy:'요한이친구',assignedTeacher:'',notes:'',status:'active'},
+      {name:'이지원',phone:'010-4776-7620',schoolYear:'3학년',school:'인하부고',attendDates:['2026-08-16','2026-08-23'],checkins:['2026-08-16','2026-08-23'],invitedBy:'강지호친구',assignedTeacher:'',notes:'부모님 신앙생활 하시고 코로나 전에 다니다가 오랜만에 출석함. 전폭완료. 영접기도 함.',status:'active'},
+      {name:'최지율',phone:'',schoolYear:'2학년',school:'',attendDates:['2026-08-23'],checkins:['2026-08-23'],invitedBy:'윤준서사촌',assignedTeacher:'',notes:'',status:'active'},
+      {name:'표중옥',phone:'010-3867-6118',schoolYear:'2학년',school:'인항고',attendDates:['2026-08-23'],checkins:['2026-08-23'],invitedBy:'주안,동규 전도',assignedTeacher:'',notes:'',status:'active'},
+      {name:'이은필',phone:'010-7595-3102',schoolYear:'2학년',school:'인항고',attendDates:['2026-08-23'],checkins:['2026-08-23'],invitedBy:'주안,동규 전도',assignedTeacher:'',notes:'',status:'active'},
+      {name:'박고은',phone:'010-2517-3384',address:'도원역 근처',schoolYear:'2학년',school:'인성여고',attendDates:['2026-08-23'],checkins:['2026-08-23'],invitedBy:'오유빈 전도',assignedTeacher:'',notes:'부천에 부모님과 함께 교회 다님,멀어서 우리교회 와봄.',status:'active'},
+      {name:'임다민',phone:'',address:'용현5동',schoolYear:'3학년',school:'인항고',attendDates:['2026-08-23','2026-08-30'],checkins:['2026-08-23','2026-08-30'],invitedBy:'기주홍 전도',assignedTeacher:'',notes:'어머님이 우리교회 다니심,어렸을적 우리교회 몇번 와봄.',status:'active'},
+      {name:'박재형',phone:'',address:'용현5동',schoolYear:'3학년',school:'재능고',attendDates:['2026-08-23','2026-08-30'],checkins:['2026-08-23','2026-08-30'],invitedBy:'기주홍전도',assignedTeacher:'',notes:'',status:'active'},
+      {name:'박지호',phone:'010-6314-5784',address:'하나아파트',schoolYear:'1학년',school:'인기공',attendDates:['2026-08-30'],checkins:['2026-08-30'],invitedBy:'차요한 전도',assignedTeacher:'',notes:'',status:'active'},
+    ];
+    const existing=(await loadCollection('newMembers').catch(()=>[]))||[];
+    const existingNames=new Set(existing.map(m=>m.name));
+    const toAdd=initial.filter(m=>!existingNames.has(m.name)).map(m=>({...m,id:uid(),createdAt:Date.now()}));
+    if(toAdd.length===0){toast('이미 모든 데이터가 등록되어 있어요.');return;}
+    await saveCollectionArr('newMembers',[...existing,...toAdd]);
+    toast(`${toAdd.length}명의 초기 데이터를 불러왔어요!`);
+  }
   async function renderNewMemberTab(panel){
     if(state._nmDetail!==undefined&&state._nmDetail!==null) return renderNewMemberDetail(panel,state._nmDetail);
     panel.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ink-soft);">불러오는 중...</div>`;
@@ -1565,11 +1613,17 @@
         ${['all','active','graduated'].map(f=>`<button class="nm-filter-btn" data-f="${f}" style="flex:1;padding:7px 0;border-radius:20px;border:1px solid var(--line);background:${filter===f?'var(--indigo)':'var(--paper)'};color:${filter===f?'#fff':'var(--ink)'};font-size:13px;cursor:pointer;">${{all:'전체',active:'활동중',graduated:'졸업'}[f]}</button>`).join('')}
       </div>
       ${filtered.length===0?`<div class="empty" style="padding:24px;">등록된 새가족이 없어요.</div>`:filtered.map(m=>{const dc=(m.attendDates||m.checkins||[]).length;const ld=(m.attendDates||m.checkins||[]).slice(-1)[0]||'';return`<button class="nm-card" data-id="${esc(m.id)}" style="width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px;cursor:pointer;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><span style="font-weight:700;font-size:15px;">${esc(m.name)}</span><span style="font-size:11px;color:${m.status==='graduated'?'#fff':'var(--indigo)'};background:${m.status==='graduated'?'var(--indigo)':'var(--dawn-soft)'};border-radius:8px;padding:1px 7px;margin-left:6px;">${m.status==='graduated'?'졸업':'활동중'}</span></div><span style="font-size:12px;color:var(--ink-soft);">출석 ${dc}회</span></div><div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">${[m.schoolYear,m.school].filter(Boolean).join(' · ')}${m.invitedBy?' · 전도: '+esc(m.invitedBy):''}</div>${ld?`<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">마지막 출석: ${esc(ld)}</div>`:''}</button>`;}).join('')}
-      <button class="btn btn-primary btn-block" id="nm-add-btn" style="margin-top:8px;">+ 새가족 등록</button>
+            <button class="btn btn-primary btn-block" id="nm-add-btn" style="margin-top:8px;">+ 새가족 등록</button>
+      <button class="btn btn-block" id="nm-import-btn" style="margin-top:6px;font-size:13px;">📥 2026년 초기 데이터 불러오기</button>
     `;
     panel.querySelectorAll('.nm-filter-btn').forEach(b=>{b.onclick=()=>{state._nmFilter=b.dataset.f;renderNewMemberTab(panel);};});
     panel.querySelectorAll('.nm-card').forEach(b=>{b.onclick=()=>{state._nmDetail=b.dataset.id;renderNewMemberDetail(panel,b.dataset.id);};});
     document.getElementById('nm-add-btn').onclick=()=>{state._nmDetail='__new__';renderNewMemberDetail(panel,'__new__');};
+    document.getElementById('nm-import-btn').onclick=async function(){
+      const confirmed=await showConfirm('2026년 새가족 38명의 초기 데이터를 불러올까요?\n(이름이 같으면 중복 추가되지 않아요)');
+      if(!confirmed)return;
+      await withLoading(this,async()=>{await importInitialNewMembers();renderNewMemberTab(panel);});
+    };
   }
   async function renderNewMemberDetail(panel,memberId){
     const isNew=memberId==='__new__';
