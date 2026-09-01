@@ -735,7 +735,7 @@
       ['attend','📋','출결관리'],
       ['stats','📊','통계'],
       ['report','📝','주간보고'],
-      ['notice','📢','공지사항'],
+      ['newMemberTab','👋','새가족'],
       ['qt','📖','QT나눔'],
       ['prayer','🙏','기도제목'],
     ];
@@ -766,7 +766,7 @@
     if(state.tab==='attend') renderAttend(panel);
     else if(state.tab==='stats') renderStats(panel);
     else if(state.tab==='report') renderWeeklyReport(panel);
-    else if(state.tab==='notice') renderNotice(panel);
+    else if(state.tab==='newMemberTab') renderNewMemberTab(panel);
     else if(state.tab==='qt') renderQt(panel);
     else renderPrayer(panel);
   }
@@ -1551,6 +1551,74 @@
         if(ok){ toast(`저장했어요! 총 ${score}점`); state._reportGrade=null; state._reportCls=null; renderWeeklyReport(panel); }
       });
     };
+  }
+  async function renderNewMemberTab(panel){
+    if(state._nmDetail!==undefined&&state._nmDetail!==null) return renderNewMemberDetail(panel,state._nmDetail);
+    panel.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ink-soft);">불러오는 중...</div>`;
+    const members=(await loadCollection('newMembers').catch(()=>[]))||[];
+    const filter=state._nmFilter||'all';
+    const filtered=filter==='all'?members:members.filter(m=>filter==='graduated'?m.status==='graduated':m.status!=='graduated');
+    panel.innerHTML=`
+      <div class="section-title serif">새가족</div>
+      <div class="section-desc">등록 현황 · 총 ${members.length}명</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        ${['all','active','graduated'].map(f=>`<button class="nm-filter-btn" data-f="${f}" style="flex:1;padding:7px 0;border-radius:20px;border:1px solid var(--line);background:${filter===f?'var(--indigo)':'var(--paper)'};color:${filter===f?'#fff':'var(--ink)'};font-size:13px;cursor:pointer;">${{all:'전체',active:'활동중',graduated:'졸업'}[f]}</button>`).join('')}
+      </div>
+      ${filtered.length===0?`<div class="empty" style="padding:24px;">등록된 새가족이 없어요.</div>`:filtered.map(m=>{const dc=(m.attendDates||m.checkins||[]).length;const ld=(m.attendDates||m.checkins||[]).slice(-1)[0]||'';return`<button class="nm-card" data-id="${esc(m.id)}" style="width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px;cursor:pointer;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><span style="font-weight:700;font-size:15px;">${esc(m.name)}</span><span style="font-size:11px;color:${m.status==='graduated'?'#fff':'var(--indigo)'};background:${m.status==='graduated'?'var(--indigo)':'var(--dawn-soft)'};border-radius:8px;padding:1px 7px;margin-left:6px;">${m.status==='graduated'?'졸업':'활동중'}</span></div><span style="font-size:12px;color:var(--ink-soft);">출석 ${dc}회</span></div><div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">${[m.schoolYear,m.school].filter(Boolean).join(' · ')}${m.invitedBy?' · 전도: '+esc(m.invitedBy):''}</div>${ld?`<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">마지막 출석: ${esc(ld)}</div>`:''}</button>`;}).join('')}
+      <button class="btn btn-primary btn-block" id="nm-add-btn" style="margin-top:8px;">+ 새가족 등록</button>
+    `;
+    panel.querySelectorAll('.nm-filter-btn').forEach(b=>{b.onclick=()=>{state._nmFilter=b.dataset.f;renderNewMemberTab(panel);};});
+    panel.querySelectorAll('.nm-card').forEach(b=>{b.onclick=()=>{state._nmDetail=b.dataset.id;renderNewMemberDetail(panel,b.dataset.id);};});
+    document.getElementById('nm-add-btn').onclick=()=>{state._nmDetail='__new__';renderNewMemberDetail(panel,'__new__');};
+  }
+  async function renderNewMemberDetail(panel,memberId){
+    const isNew=memberId==='__new__';
+    const members=(await loadCollection('newMembers').catch(()=>[]))||[];
+    const base=isNew?{id:uid(),name:'',phone:'',address:'',schoolYear:'',school:'',attendDates:[],invitedBy:'',assignedTeacher:'',notes:'',status:'active',createdAt:Date.now()}:members.find(m=>m.id===memberId);
+    if(!base){state._nmDetail=null;return renderNewMemberTab(panel);}
+    const member={...base};
+    let currentDates=[...(member.attendDates||member.checkins||[])];
+    let currentStatus=member.status||'active';
+    panel.innerHTML=`
+      <button id="nm-back" style="background:none;border:none;color:var(--indigo);font-size:14px;cursor:pointer;padding:0;margin-bottom:12px;">← 목록으로</button>
+      <div class="section-title serif">${isNew?'새가족 등록':esc(member.name)}</div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label style="font-size:12px;color:var(--ink-soft);">이름 *</label><input id="nm-name" type="text" value="${esc(member.name)}" placeholder="이름" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"></div>
+          <div><label style="font-size:12px;color:var(--ink-soft);">학년</label><select id="nm-schoolyear" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"><option value="">선택</option>${['1학년','2학년','3학년'].map(y=>`<option value="${y}" ${member.schoolYear===y?'selected':''}>${y}</option>`).join('')}</select></div>
+          <div><label style="font-size:12px;color:var(--ink-soft);">연락처</label><input id="nm-phone" type="text" value="${esc(member.phone||'')}" placeholder="010-0000-0000" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"></div>
+          <div><label style="font-size:12px;color:var(--ink-soft);">학교</label><input id="nm-school" type="text" value="${esc(member.school||'')}" placeholder="학교명" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"></div>
+          <div style="grid-column:1/-1;"><label style="font-size:12px;color:var(--ink-soft);">주소</label><input id="nm-address" type="text" value="${esc(member.address||'')}" placeholder="주소" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"></div>
+          <div><label style="font-size:12px;color:var(--ink-soft);">전도한 친구</label><input id="nm-invited" type="text" value="${esc(member.invitedBy||'')}" placeholder="전도한 친구" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"></div>
+          <div><label style="font-size:12px;color:var(--ink-soft);">담당 교사</label><input id="nm-teacher" type="text" value="${esc(member.assignedTeacher||'')}" placeholder="담당 교사" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);"></div>
+          <div style="grid-column:1/-1;"><label style="font-size:12px;color:var(--ink-soft);">비고</label><textarea id="nm-notes" placeholder="비고" rows="2" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;background:var(--paper);color:var(--ink);resize:none;">${esc(member.notes||'')}</textarea></div>
+          <div style="grid-column:1/-1;"><label style="font-size:12px;color:var(--ink-soft);">상태</label><div style="display:flex;gap:8px;margin-top:4px;"><button id="nm-st-a" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:${currentStatus==='active'?'var(--indigo)':'var(--paper)'};color:${currentStatus==='active'?'#fff':'var(--ink)'};cursor:pointer;font-size:13px;font-family:inherit;">활동중</button><button id="nm-st-g" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:${currentStatus==='graduated'?'var(--indigo)':'var(--paper)'};color:${currentStatus==='graduated'?'#fff':'var(--ink)'};cursor:pointer;font-size:13px;font-family:inherit;">졸업(반배정)</button></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-weight:600;">출석 일자 (<span id="nm-dc">${currentDates.length}</span>회)</span><button id="nm-add-date" style="background:var(--indigo);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;">+ 날짜 추가</button></div>
+        <div id="nm-dates-list"></div>
+      </div>
+      <button class="btn btn-primary btn-block" id="nm-save-btn" style="margin-top:8px;">${isNew?'등록하기':'저장하기'}</button>
+      ${!isNew?`<button class="btn btn-block" id="nm-del-btn" style="margin-top:6px;color:#e53e3e;border-color:#e53e3e;">삭제</button>`:''}
+    `;
+    const refreshDates=()=>{
+      document.getElementById('nm-dc').textContent=currentDates.length;
+      document.getElementById('nm-dates-list').innerHTML=currentDates.length===0?`<div style="color:var(--ink-soft);font-size:13px;">출석 일자가 없어요.</div>`:currentDates.map((d,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--dawn-soft);border-radius:16px;padding:4px 10px;font-size:13px;margin:3px;">${esc(d)}<button data-di="${i}" style="background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:16px;padding:0;line-height:1;">×</button></span>`).join('');
+      document.querySelectorAll('#nm-dates-list [data-di]').forEach(b=>{b.onclick=()=>{currentDates.splice(parseInt(b.dataset.di),1);refreshDates();};});
+    };
+    refreshDates();
+    document.getElementById('nm-add-date').onclick=()=>{const d=prompt('출석 날짜 입력 (예: 2026-08-30 또는 수련회참석)');if(d&&d.trim()){currentDates.push(d.trim());refreshDates();}};
+    document.getElementById('nm-st-a').onclick=function(){currentStatus='active';this.style.background='var(--indigo)';this.style.color='#fff';document.getElementById('nm-st-g').style.background='var(--paper)';document.getElementById('nm-st-g').style.color='var(--ink)';};
+    document.getElementById('nm-st-g').onclick=function(){currentStatus='graduated';this.style.background='var(--indigo)';this.style.color='#fff';document.getElementById('nm-st-a').style.background='var(--paper)';document.getElementById('nm-st-a').style.color='var(--ink)';};
+    document.getElementById('nm-back').onclick=()=>{state._nmDetail=null;renderNewMemberTab(panel);};
+    document.getElementById('nm-save-btn').onclick=async function(){
+      const name=document.getElementById('nm-name').value.trim();
+      if(!name){toast('이름을 입력해 주세요.');return;}
+      const updated={...member,name,phone:document.getElementById('nm-phone').value.trim(),address:document.getElementById('nm-address').value.trim(),schoolYear:document.getElementById('nm-schoolyear').value,school:document.getElementById('nm-school').value.trim(),attendDates:currentDates,checkins:currentDates,invitedBy:document.getElementById('nm-invited').value.trim(),assignedTeacher:document.getElementById('nm-teacher').value.trim(),notes:document.getElementById('nm-notes').value.trim(),status:currentStatus};
+      await withLoading(this,async()=>{const ok=await saveItem('newMembers',updated);if(ok){toast(isNew?'등록했어요!':'저장했어요!');state._nmDetail=null;renderNewMemberTab(panel);}});
+    };
+    if(!isNew){document.getElementById('nm-del-btn').onclick=async function(){const confirmed=await showConfirm(`${member.name}님을 삭제할까요?`);if(!confirmed)return;await withLoading(this,async()=>{await deleteItem('newMembers',member.id);toast('삭제했어요.');state._nmDetail=null;renderNewMemberTab(panel);});};}
   }
 window.generateYearlyAttendance=async function(){
   if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중... 잠시 후 다시 시도해주세요.');return;}
