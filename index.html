@@ -1392,8 +1392,8 @@
         const tl={absence:'결석사유',visit:'심방기록',etc:'기타'};
         const tc={absence:'#e53e3e',visit:'var(--indigo)',etc:'#888'};
                 const is장결반=g.cls==='1반';
-        const act3=activeSundays.slice(0,3);
-        const act4=activeSundays.slice(0,4);
+                const act3=activeSundays.slice(-3);
+        const act4=activeSundays.slice(-4);
         const absentStreak=act3.filter(d=>!k.checkins.includes(d)).length;
         const isLongAbsent=is장결반||(act3.length>=3&&absentStreak>=3);
         const streak4=act4.filter(d=>!k.checkins.includes(d)).length;
