@@ -1405,17 +1405,7 @@
           <td style="padding:9px 12px; font-size:13.5px;">${esc(k.name)}${absentBadge}</td>
           <td style="padding:9px 12px; text-align:center; font-size:13px; font-weight:700; color:${isPresent?'var(--indigo)':'var(--rose)'};">${isPresent?'✅ 출석':'❌ 결석'}</td>
           <td style="padding:9px 12px; text-align:center; font-size:12.5px; color:var(--ink-soft);">${k.checkins.length}회</td>
-        </tr>${notesHtml}`;        const recentNotes = (k.notes||[]).slice().sort((a,b)=>
-        const notesHtml = recentNotes.length ? `<tr style="border-bottom:1px solid var(--line);background:${isLongAbsent?'#fff5f5':'var(--dawn-soft,#f7f6ff)'};">
-          <td colspan="3" style="padding:6px 14px 8px 14px;">
-            ${recentNotes.map(n=>`<div style="font-size:11.5px;color:var(--ink-soft);line-height:1.6;"><span style="color:${tc[n.type]||'#888'};font-weight:700;">[${tl[n.type]||'기타'} ${n.date||''}]</span> ${esc((n.content||'').slice(0,60))}${(n.content||'').length>60?'…':''}<span style="color:var(--ink-soft);font-size:10.5px;"> — ${esc(n.author||'')}</span></div>`).join('')}
-          </td>
-        </tr>` : '';
-        return `<tr style="border-bottom:${recentNotes.length?'none':'1px solid var(--line)'};background:${isLongAbsent&&!recentNotes.length?'#fff5f5':''};">
-          <td style="padding:9px 12px; font-size:13.5px;">${esc(k.name)}${absentBadge}</td>
-          <td style="padding:9px 12px; text-align:center; font-size:13px; font-weight:700; color:${isPresent?'var(--indigo)':'var(--rose)'};">${isPresent?'✅ 출석':'❌ 결석'}</td>
-          <td style="padding:9px 12px; text-align:center; font-size:12.5px; color:var(--ink-soft);">${k.checkins.length}회</td>
-        </tr>${notesHtml}`;
+               </tr>${notesHtml}`;
       }).join('');
       return `<div class="card" style="padding:0; overflow:hidden; margin-bottom:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--paper);">
