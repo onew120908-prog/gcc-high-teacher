@@ -1391,13 +1391,12 @@
                 const recentNotes = (k.notes||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||b.createdAt-a.createdAt).slice(0,3);
         const tl={absence:'결석사유',visit:'심방기록',etc:'기타'};
         const tc={absence:'#e53e3e',visit:'var(--indigo)',etc:'#888'};
-                const is장결반=g.cls==='1반';
-                const act3=activeSundays.slice(-3);
+                        const act3=activeSundays.slice(-3);
         const act4=activeSundays.slice(-4);
         const absentStreak=act3.filter(d=>!k.checkins.includes(d)).length;
-                const isLongAbsent=is장결반||(k.checkins.length>0&&act3.length>=3&&absentStreak>=3);
+        const isLongAbsent=act3.length>=3&&absentStreak>=3;
         const streak4=act4.filter(d=>!k.checkins.includes(d)).length;
-        const isVeryLongAbsent=is장결반||(k.checkins.length>0&&act4.length>=4&&streak4>=4);
+        const isVeryLongAbsent=act4.length>=4&&streak4>=4;
         const absentBadge=isVeryLongAbsent?`<span style="font-size:10px;background:#e53e3e;color:#fff;border-radius:6px;padding:1px 6px;margin-left:5px;font-weight:700;">4주↑ 장결</span>`:isLongAbsent?`<span style="font-size:10px;background:#f6ad55;color:#fff;border-radius:6px;padding:1px 6px;margin-left:5px;font-weight:700;">3주 연속결석</span>`:'';
         const notesHtml = recentNotes.length ? `<tr style="border-bottom:1px solid var(--line);background:${isLongAbsent?'#fff5f5':'var(--dawn-soft,#f7f6ff)'};">
           <td colspan="3" style="padding:6px 14px 8px 14px;">
