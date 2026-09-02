@@ -1394,9 +1394,9 @@
                         const act3=activeSundays.slice(-3);
         const act4=activeSundays.slice(-4);
         const absentStreak=act3.filter(d=>!k.checkins.includes(d)).length;
-        const isLongAbsent=act3.length>=3&&absentStreak>=3;
+                const isLongAbsent=k.checkins.length>=2&&act3.length>=3&&absentStreak>=3;
         const streak4=act4.filter(d=>!k.checkins.includes(d)).length;
-        const isVeryLongAbsent=act4.length>=4&&streak4>=4;
+        const isVeryLongAbsent=k.checkins.length>=2&&act4.length>=4&&streak4>=4;
         const absentBadge=isVeryLongAbsent?`<span style="font-size:10px;background:#e53e3e;color:#fff;border-radius:6px;padding:1px 6px;margin-left:5px;font-weight:700;">4주↑ 장결</span>`:isLongAbsent?`<span style="font-size:10px;background:#f6ad55;color:#fff;border-radius:6px;padding:1px 6px;margin-left:5px;font-weight:700;">3주 연속결석</span>`:'';
         const notesHtml = recentNotes.length ? `<tr style="border-bottom:1px solid var(--line);background:${isLongAbsent?'#fff5f5':'var(--dawn-soft,#f7f6ff)'};">
           <td colspan="3" style="padding:6px 14px 8px 14px;">
