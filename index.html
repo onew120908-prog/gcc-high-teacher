@@ -1392,7 +1392,7 @@
         const tl={absence:'결석사유',visit:'심방기록',etc:'기타'};
         const tc={absence:'#e53e3e',visit:'var(--indigo)',etc:'#888'};
                                 
-        const notesHtml = recentNotes.length ? `<tr style="border-bottom:1px solid var(--line);background:${isLongAbsent?'#fff5f5':'var(--dawn-soft,#f7f6ff)'};">
+        const notesHtml = recentNotes.length ? `<tr style="border-bottom:1px solid var(--line);background:var(--dawn-soft,#f7f6ff);">
           <td colspan="3" style="padding:6px 14px 8px 14px;">
             ${recentNotes.map(n=>`<div style="font-size:11.5px;color:var(--ink-soft);line-height:1.6;"><span style="color:${tc[n.type]||'#888'};font-weight:700;">[${tl[n.type]||'기타'} ${n.date||''}]</span> ${esc((n.content||'').slice(0,60))}${(n.content||'').length>60?'…':''}<span style="color:var(--ink-soft);font-size:10.5px;"> — ${esc(n.author||'')}</span></div>`).join('')}
           </td>
