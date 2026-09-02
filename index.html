@@ -1398,7 +1398,7 @@
           </td>
         </tr>` : '';
         return `<tr style="border-bottom:${recentNotes.length?'none':'1px solid var(--line)'};background:${isLongAbsent&&!recentNotes.length?'#fff5f5':''};">
-          <td style="padding:9px 12px; font-size:13.5px;">${esc(k.name)}${absentBadge}</td>
+          <td style="padding:9px 12px; font-size:13.5px;">${esc(k.name)}</td>
           <td style="padding:9px 12px; text-align:center; font-size:13px; font-weight:700; color:${isPresent?'var(--indigo)':'var(--rose)'};">${isPresent?'✅ 출석':'❌ 결석'}</td>
           <td style="padding:9px 12px; text-align:center; font-size:12.5px; color:var(--ink-soft);">${k.checkins.length}회</td>
                </tr>${notesHtml}`;
