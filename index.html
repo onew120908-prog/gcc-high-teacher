@@ -1564,7 +1564,7 @@
     document.getElementById('report-back').onclick=()=>{ state._reportGrade=null; state._reportCls=null; renderWeeklyReport(panel); };
     document.getElementById('report-save').onclick=async function(){
       const activities={};
-      panel.querySelectorAll('[data-act]').forEach(cb=>{ activities[cb.dataset.act]=cb.checked; });
+panel.querySelectorAll('[data-act]').forEach(cb=>{ activities[cb.dataset.act]=cb.dataset.type==='count'?parseInt(cb.value)||0:cb.checked; });
       const phoneVisits=parseInt(document.getElementById('phone-visits').value)||0;
       const studentQt=parseInt(document.getElementById('student-qt').value)||0;
       const studentQtNames=document.getElementById('student-qt-names').value.trim();
