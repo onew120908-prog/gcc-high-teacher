@@ -1528,11 +1528,18 @@
 
       <div class="card">
         <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-weight:500;">교사 활동</div>
-        ${[['토요새벽',20],['교사날샘',10],['주일저녁',10],['사랑방',10]].map(([act,pt])=>`
-          <label style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;">
+                ${[['토요새벽',20],['교사날샘',10],['주일저녁',10],['사랑방',10]].map(([act,pt])=>{
+          const isSabyeokCount=['임형준','이지선','정주식','이혜진'].includes(state.teacherName);
+          if(act==='토요새벽'&&isSabyeokCount){
+            const cnt=typeof acts[act]==='number'?acts[act]:(acts[act]?1:0);
+            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);">
+            <div><span style="font-size:14px;">${act}</span><span style="font-size:12px;color:var(--ink-soft);margin-left:8px;">횟수 × ${pt}점</span></div>
+            <input type="number" data-act="${act}" data-type="count" min="0" value="${cnt}" style="width:60px;padding:6px;text-align:center;font-size:16px;font-weight:700;border:1px solid var(--line);border-radius:8px;"></div>`;
+          }
+          return `<label style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;">
             <div><span style="font-size:14px;">${act}</span><span style="font-size:12px;color:var(--ink-soft);margin-left:8px;">+${pt}점</span></div>
             <input type="checkbox" data-act="${act}" style="width:20px;height:20px;accent-color:var(--indigo);cursor:pointer;" ${acts[act]?'checked':''}>
-          </label>`).join('')}
+          </label>`;}).join('')}
       </div>
 
       <div class="card">
