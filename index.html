@@ -1568,7 +1568,7 @@ panel.querySelectorAll('[data-act]').forEach(cb=>{ activities[cb.dataset.act]=cb
       const phoneVisits=parseInt(document.getElementById('phone-visits').value)||0;
       const studentQt=parseInt(document.getElementById('student-qt').value)||0;
       const studentQtNames=document.getElementById('student-qt-names').value.trim();
-      const score=phoneVisits*5+(activities['토요새벽']?20:0)+(activities['교사날샘']?10:0)+(activities['주일저녁']?10:0)+(activities['사랑방']?10:0)+studentQt*10;
+      const score=phoneVisits*5+(typeof activities['토요새벽']==='number'?activities['토요새벽']*20:(activities['토요새벽']?20:0))+(activities['교사날샘']?10:0)+(activities['주일저녁']?10:0)+(activities['사랑방']?10:0)+studentQt*10;
       await withLoading(this,async()=>{
         const ok=await saveItem('weeklyReport',{ id:reportId, grade, cls, week:thisSunday, phoneVisits, activities, studentQt, studentQtNames, score, author:state.teacherName, submittedAt:Date.now() });
         if(ok){ toast(`저장했어요! 총 ${score}점`); state._reportGrade=null; state._reportCls=null; renderWeeklyReport(panel); }
