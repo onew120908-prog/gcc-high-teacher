@@ -320,6 +320,20 @@
     async listAllWeeklyReports() {
       const snap = await _db.collection('weeklyReports').get();
       return snap.docs.map(d => d.data());
+    },
+    async setKid(id, data) {
+      await _db.collection('roster').doc(id).set(data);
+    },
+    async getKid(id) {
+      const snap = await _db.collection('roster').doc(id).get();
+      return snap.exists ? snap.data() : null;
+    },
+    async listKids() {
+      const snap = await _db.collection('roster').get();
+      return snap.docs.map(d => d.data());
+    },
+    async deleteKidDoc(id) {
+      await _db.collection('roster').doc(id).delete();
     }
   };
 })();
@@ -492,12 +506,20 @@
       return arr;
     } catch(e){ console.error(e); return []; }
   }
+  function kidDocId(grade, cls, name){ return `${grade}_${cls}_${name}`; }
   async function loadRoster(){
     try {
+      const arr = await window.storage.listKids();
+      if(arr.length) return arr.map(k=>({ grade:k.grade, cls:k.cls, name:k.name, checkins:k.checkins||[], notes:k.notes||[] }));
+      // 레거시: kv/roster 문서 마이그레이션
       const r = await storageGetWithRetry('roster').catch(()=>null);
       if(r){
-        const arr = JSON.parse(r.value);
-        return Array.isArray(arr) ? arr.map(k=>({ grade:k.grade, cls:k.cls, name:k.name, checkins:k.checkins||[], notes:k.notes||[] })) : [];
+        const legacy = JSON.parse(r.value);
+        if(Array.isArray(legacy) && legacy.length){
+          await Promise.all(legacy.map(k=>window.storage.setKid(kidDocId(k.grade,k.cls,k.name),{grade:k.grade,cls:k.cls,name:k.name,checkins:k.checkins||[],notes:k.notes||[]})));
+          toast(`저장 방식 업그레이드: 학생 ${legacy.length}명 이전 완료`);
+          return legacy.map(k=>({ grade:k.grade, cls:k.cls, name:k.name, checkins:k.checkins||[], notes:k.notes||[] }));
+        }
       }
       if(!_rosterMigrationDone){
         _rosterMigrationDone = true;
@@ -513,7 +535,10 @@
     }
   }
   async function saveRoster(arr){
-    try { await storageSetWithRetry('roster', JSON.stringify(arr)); return true; }
+    try {
+      await Promise.all(arr.map(k=>window.storage.setKid(kidDocId(k.grade,k.cls,k.name),{grade:k.grade,cls:k.cls,name:k.name,checkins:k.checkins||[],notes:k.notes||[]})));
+      return true;
+    }
     catch(e){ console.error(e); toast('저장에 실패했어요. 다시 시도해 주세요.'); return false; }
   }
   async function loadAllKids(){
@@ -524,29 +549,24 @@
     return arr.findIndex(k=>k.grade===grade && k.cls===cls && k.name===name);
   }
   async function kidExists(grade, cls, name){
-    const arr = await loadRoster();
-    return findKidIndex(arr, grade, cls, name) >= 0;
+    return (await window.storage.getKid(kidDocId(grade,cls,name))) !== null;
   }
   async function addKid(grade, cls, name){
-    const arr = await loadRoster();
-    if(findKidIndex(arr, grade, cls, name) >= 0) return { ok:false, reason:'dup' };
-    arr.push({ grade, cls, name, checkins: [], notes: [] });
-    const ok = await saveRoster(arr);
-    return { ok };
+    const id = kidDocId(grade,cls,name);
+    if(await window.storage.getKid(id)) return { ok:false, reason:'dup' };
+    await window.storage.setKid(id, { grade, cls, name, checkins:[], notes:[] });
+    return { ok:true };
   }
   async function updateKid(grade, cls, name, patch){
-    const arr = await loadRoster();
-    const idx = findKidIndex(arr, grade, cls, name);
-    if(idx < 0) return false;
-    arr[idx] = Object.assign({}, arr[idx], patch);
-    return await saveRoster(arr);
+    const id = kidDocId(grade,cls,name);
+    const existing = await window.storage.getKid(id);
+    if(!existing) return false;
+    await window.storage.setKid(id, Object.assign({}, existing, patch));
+    return true;
   }
   async function deleteKid(grade, cls, name){
-    const arr = await loadRoster();
-    const idx = findKidIndex(arr, grade, cls, name);
-    if(idx < 0) return true;
-    arr.splice(idx, 1);
-    return await saveRoster(arr);
+    try { await window.storage.deleteKidDoc(kidDocId(grade,cls,name)); return true; }
+    catch(e){ console.error(e); return false; }
   }
   function groupByClass(kids){
     const map = new Map();
