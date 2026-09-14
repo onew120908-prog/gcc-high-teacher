@@ -321,6 +321,21 @@
       const snap = await _db.collection('weeklyReports').get();
       return snap.docs.map(d => d.data());
     },
+    async migrateWeeklyReports() {
+      // 기존 kv/weeklyReports 배열을 개별 문서로 이전
+      const snap = await _db.collection('weeklyReports').limit(1).get();
+      if(!snap.empty) return 0; // 이미 이전된 경우
+      const legacy = await _db.collection('kv').doc('weeklyReports').get();
+      if(!legacy.exists) return 0;
+      const arr = JSON.parse(legacy.data().v);
+      if(!Array.isArray(arr) || !arr.length) return 0;
+      const batch = _db.batch();
+      arr.forEach(r => {
+        if(r && r.id) batch.set(_db.collection('weeklyReports').doc(r.id), r);
+      });
+      await batch.commit();
+      return arr.length;
+    },
     async setKid(id, data) {
       await _db.collection('roster').doc(id).set(data);
     },
@@ -1495,6 +1510,9 @@
        async function renderWeeklyReport(panel){
     const thisSunday = getThisSunday();
     if(state._reportAdmin){ await renderAdminReport(panel, thisSunday); return; }
+
+    // 최초 1회 기존 데이터 이전
+    window.storage.migrateWeeklyReports().then(n=>{ if(n>0){ toast(`주간보고 ${n}건 데이터 이전 완료`); renderWeeklyReport(panel); } }).catch(()=>{});
 
     if(state._reportGrade === null || state._reportGrade === undefined){
       const all = await loadAllKids().catch(()=>[]);
